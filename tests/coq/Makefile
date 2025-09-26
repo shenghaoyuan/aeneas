@@ -21,6 +21,23 @@ verify: $(VERIFY_DIRS)
 verif-%:
 	cd $* && make all
 
+# =============================================================================
+# Custom Targets for Single File Verification
+# =============================================================================
+
+.PHONY: verify-coq-file
+verify-coq-file:
+	@# This target verifies a single Coq .v file using the Coq compiler.
+	@# It requires the 'coqc' command to be available in your PATH.
+	@# Usage: make verify-coq-file FILE=path/to/your/file.v
+	@if [ -z "$(FILE)" ]; then \
+		echo "Error: You must specify the file to verify."; \
+		echo "Usage: make verify-coq-file FILE=<path_to_your_file.v>"; \
+		exit 1; \
+	fi
+	@echo "Verifying Coq file: $(FILE)"
+	cd $(dir $(FILE)) && make $(notdir $(FILE:.v=.vo))
+
 .PHONY: copy-makefile-%
 copy-makefile-%:
 	rm -f $*/Makefile
