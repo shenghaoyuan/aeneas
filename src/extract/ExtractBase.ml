@@ -456,7 +456,7 @@ let str_name () = if backend () = Lean then "String" else "string"
 let int_name (int_ty : integer_type) : string =
   let isize, usize, i_format, u_format =
     match backend () with
-    | FStar | Coq | HOL4 ->
+    | FStar | Coq | HOL4 | Isabelle->
         ("isize", "usize", format_of_string "i%d", format_of_string "u%d")
     | Lean -> ("Isize", "Usize", format_of_string "I%d", format_of_string "U%d")
   in
@@ -477,7 +477,7 @@ let int_name (int_ty : integer_type) : string =
 let float_name (float_ty : float_type) : string =
   let format =
     match backend () with
-    | FStar | Coq | HOL4 -> format_of_string "f%d"
+    | FStar | Coq | HOL4 | Isabelle-> format_of_string "f%d"
     | Lean -> format_of_string "F%d"
   in
   match float_ty with
@@ -493,11 +493,11 @@ let scalar_name (ty : literal_type) : string =
   | TFloat ty -> float_name ty
   | TBool -> (
       match backend () with
-      | FStar | Coq | HOL4 -> "bool"
+      | FStar | Coq | HOL4 | Isabelle -> "bool"
       | Lean -> "Bool")
   | TChar -> (
       match backend () with
-      | FStar | Coq | HOL4 -> "char"
+      | FStar | Coq | HOL4 | Isabelle -> "char"
       | Lean -> "Char")
 
 (** Extraction context.
@@ -784,7 +784,7 @@ let unop_name (unop : unop) : string =
           | Some _ -> "~~~"
         end
       | Coq -> if Option.is_none ty then "negb" else "scalar_not"
-      | HOL4 -> "~")
+      | HOL4 | Isabelle -> "~")
   | Neg (int_ty : integer_type) -> (
       match backend () with
       | Lean -> "-."
@@ -822,7 +822,7 @@ let named_binop_name (binop : E.binop) (int_ty : integer_type) : string =
   (* Remark: the Lean case is actually not used *)
   match backend () with
   | Lean -> int_name int_ty ^ "." ^ binop_s
-  | FStar | Coq | HOL4 -> int_name int_ty ^ "_" ^ binop_s
+  | FStar | Coq | HOL4 | Isabelle -> int_name int_ty ^ "_" ^ binop_s
 
 (** A list of keywords/identifiers used by the backend and with which we want to
     check collision.
@@ -1041,6 +1041,52 @@ let keywords () =
           "then";
           "Theorem";
         ]
+    | Isabelle ->
+        [
+          "abbreviation";
+          "and";
+          "appply";
+          "assumes";
+          "axiomatization";
+          "begin";
+          "by";
+          "case";
+          "corollary";
+          "datatype";
+          "definition";
+          "done";
+          "else";
+          "end";
+          "fixes";
+          "for";
+          "fun";
+          "if";
+          "imports";
+          "in";
+          "inductive";
+          "lemma";
+          "let";
+          "namespace";
+          "notes";
+          "obtains";
+          "of";
+          "partial_function";
+          "primrec";
+          "proof";
+          "prop";
+          "qed";
+          "record";
+          "shows";
+          "sorry";
+          "term";
+          "theorem";
+          "then";
+          "theory";
+          "typ";
+          "typedef";
+          "value";
+          "where";
+        ]
   in
   List.concat [ named_unops; named_binops; misc ]
 
@@ -1049,7 +1095,7 @@ let builtin_adts () : (builtin_ty * string) list =
     if !use_state then
       match backend () with
       | Lean -> [ (TState, "State") ]
-      | Coq | FStar | HOL4 -> [ (TState, "state") ]
+      | Coq | FStar | HOL4 | Isabelle -> [ (TState, "state") ]
     else []
   in
   (* We voluntarily omit the type [Error]: it is never directly
@@ -1067,7 +1113,7 @@ let builtin_adts () : (builtin_ty * string) list =
           (TRawPtr Mut, "MutRawPtr");
           (TRawPtr Const, "ConstRawPtr");
         ]
-    | Coq | FStar | HOL4 ->
+    | Coq | FStar | HOL4 | Isabelle ->
         [
           (TResult, "result");
           (TFuel, if backend () = HOL4 then "num" else "nat");
@@ -1086,10 +1132,11 @@ let builtin_struct_constructors () : (builtin_ty * string) list =
   | Coq -> [ (TArray, "mk_array") ]
   | FStar -> [ (TArray, "mk_array") ]
   | HOL4 -> [ (TArray, "mk_array") ]
+  | Isabelle -> [ (TArray, "mk_array") ]
 
 let builtin_variants () : (builtin_ty * VariantId.id * string) list =
   match backend () with
-  | FStar ->
+  | FStar | Isabelle ->
       [
         (TResult, result_ok_id, "Ok");
         (TResult, result_fail_id, "Fail");
@@ -1126,7 +1173,7 @@ let builtin_variants () : (builtin_ty * VariantId.id * string) list =
 
 let builtin_llbc_functions () : (A.builtin_fun_id * string) list =
   match backend () with
-  | FStar | Coq | HOL4 ->
+  | FStar | Coq | HOL4 | Isabelle ->
       [
         (ArrayToSliceShared, "array_to_slice");
         (ArrayToSliceMut, "array_to_slice_mut");
@@ -1157,7 +1204,7 @@ let builtin_llbc_functions () : (A.builtin_fun_id * string) list =
 
 let builtin_pure_functions () : (pure_builtin_fun_id * string) list =
   match backend () with
-  | FStar ->
+  | FStar | Isabelle ->
       [
         (Return, "return");
         (Fail, "fail");
@@ -1331,6 +1378,25 @@ let type_decl_kind_to_qualif (span : Meta.span) (kind : decl_kind)
       | SingleRec | MutRecFirst | MutRecInner | MutRecLast -> Some "inductive"
       | Builtin -> Some "axiom"
       | Declared -> Some "axiom")
+  | Isabelle -> (
+      match (kind, type_kind) with
+      | SingleNonRec, Some Typle -> Some "abbreviation"
+      | SingleNonRec, Some Enum -> Some "datatype"
+      | SingleNonRec, Some Struct -> Some "record"
+      | (SingleRec | MutRecFirst), Some _ ->
+          (* Mutually recursive records are not supported, but we assume they are
+           * promoted to datatypes if this happens. *)
+          Some "datatype"
+      | (MutRecInner | MutRecLast), Some _ -> Some "and"
+      | (Builtin | Declared), _ -> Some "typedecl"
+      | SingleNonRec, None ->
+          (* This is for traits - we extract them as records *)
+          Some "record"
+      | _ ->
+          [%craise] span
+            ("Unexpected: (" ^ show_decl_kind kind ^ ", "
+            ^ Print.option_to_string show_type_decl_kind type_kind
+            ^ ")"))
   | HOL4 -> None
 
 (** Compute the qualified for a function definition/declaration.
@@ -1367,12 +1433,21 @@ let fun_decl_kind_to_qualif (kind : decl_kind) : string option =
       | MutRecLast -> Some "def"
       | Builtin -> Some "axiom"
       | Declared -> Some "axiom")
+  | Isabelle -> (
+      match kind with
+      | SingleNonRec -> Some "definition"
+      | SingleRec -> Some "fun"
+      | MutRecFirst -> Some "fun"
+      | MutRecInner -> Some "and"
+      | MutRecLast -> Some "and"
+      | Builtin -> Some "axiomatization"
+      | Declared -> Some "axiomatization")
   | HOL4 -> None
 
 (** Compute the qualifier to add after the definition. *)
 let fun_decl_kind_to_post_qualif (kind : decl_kind) : string option =
   match backend () with
-  | FStar | Coq | HOL4 -> None
+  | FStar | Coq | HOL4 | Isabelle -> None
   | Lean -> (
       match kind with
       | SingleNonRec | Builtin | Declared -> None
@@ -1386,6 +1461,7 @@ let type_keyword (span : Meta.span) =
   match backend () with
   | FStar -> "Type0"
   | Coq | Lean -> "Type"
+  | Isabelle -> "type"
   | HOL4 -> [%craise] span "Unexpected"
 
 (** Helper *)
@@ -1436,7 +1512,7 @@ let ctx_compute_type_name (item_meta : Types.item_meta) (ctx : extraction_ctx)
   let name = ctx_compute_type_name_no_suffix ctx item_meta name in
   match backend () with
   | FStar -> StringUtils.lowercase_first_letter (name ^ "_t")
-  | Coq | HOL4 -> name ^ "_t"
+  | Coq | HOL4 | Isabelle -> name ^ "_t"
   | Lean -> name
 
 (** Inputs:
@@ -1474,7 +1550,7 @@ let ctx_compute_field_name (def : type_decl) (field_meta : Meta.attr_info)
   in
   match backend () with
   | Lean | HOL4 -> name
-  | Coq | FStar -> StringUtils.lowercase_first_letter name
+  | Coq | FStar | Isabelle -> StringUtils.lowercase_first_letter name
 
 (** Inputs:
     - type name
@@ -1486,7 +1562,7 @@ let ctx_compute_variant_name (ctx : extraction_ctx) (def : type_decl)
     Option.value variant.variant_attr_info.rename ~default:variant.variant_name
   in
   match backend () with
-  | FStar | Coq | HOL4 ->
+  | FStar | Coq | HOL4 | Isabelle ->
       let variant = to_camel_case variant in
       (* Prefix the name of the variant with the name of the type, if necessary
          (some backends don't support collision of variant names) *)
@@ -1545,7 +1621,7 @@ let ctx_compute_fun_name_no_suffix (meta : T.item_meta) (ctx : extraction_ctx)
   (* TODO: don't convert to snake case for Coq, HOL4, F* *)
   let fname = flatten_name fname in
   match backend () with
-  | FStar | Coq | HOL4 -> StringUtils.lowercase_first_letter fname
+  | FStar | Coq | HOL4 | Isabelle -> StringUtils.lowercase_first_letter fname
   | Lean -> fname
 
 (** Provided a basename, compute the name of a global declaration. *)
@@ -1553,7 +1629,7 @@ let ctx_compute_global_name (meta : T.item_meta) (ctx : extraction_ctx)
     (name : llbc_name) : string =
   let name = ctx_compute_simple_name meta ctx name in
   match Config.backend () with
-  | Coq | FStar | HOL4 ->
+  | Coq | FStar | HOL4 | Isabelle ->
       let parts = List.map to_snake_case name in
       String.concat "_" parts
   | Lean -> flatten_name name
@@ -1637,7 +1713,7 @@ let ctx_compute_trait_impl_name (ctx : extraction_ctx) (trait_decl : trait_decl)
   in
   (* Additional modifications to make sure we comply with the backends restrictions *)
   match backend () with
-  | FStar -> StringUtils.lowercase_first_letter name
+  | FStar | Isabelle -> StringUtils.lowercase_first_letter name
   | Coq | HOL4 | Lean -> name
 
 let ctx_compute_trait_decl_constructor (ctx : extraction_ctx)
@@ -1718,7 +1794,7 @@ let ctx_compute_trait_parent_clause_name (ctx : extraction_ctx)
   in
   let clause = clause ^ "Inst" in
   match backend () with
-  | FStar -> StringUtils.lowercase_first_letter clause
+  | FStar | Isabelle -> StringUtils.lowercase_first_letter clause
   | Coq | HOL4 | Lean -> clause
 
 let ctx_compute_trait_type_name (ctx : extraction_ctx) (trait_decl : trait_decl)
@@ -1738,7 +1814,7 @@ let ctx_compute_trait_type_name (ctx : extraction_ctx) (trait_decl : trait_decl)
   *)
   match backend () with
   | FStar -> "t" ^ name
-  | Coq | Lean | HOL4 -> name
+  | Coq | Lean | HOL4 | Isabelle -> name
 
 let ctx_compute_trait_const_name (ctx : extraction_ctx)
     (trait_decl : trait_decl) (item : string) : string =
@@ -1749,7 +1825,7 @@ let ctx_compute_trait_const_name (ctx : extraction_ctx)
   (* See [trait_type_name] *)
   match backend () with
   | FStar -> "c" ^ name
-  | Coq | Lean | HOL4 -> name
+  | Coq | Lean | HOL4 | Isabelle -> name
 
 let ctx_compute_trait_method_name (ctx : extraction_ctx)
     (trait_decl : trait_decl) (item : string) : string =
@@ -1786,7 +1862,7 @@ let ctx_compute_termination_measure_name (meta : T.item_meta)
     match Config.backend () with
     | FStar -> "_decreases"
     | Lean -> "_terminates"
-    | Coq | HOL4 -> [%craise] meta.span "Unexpected"
+    | Coq | HOL4 | Isabelle -> [%craise] meta.span "Unexpected"
   in
   (* Concatenate *)
   fname ^ lp_suffix ^ suffix
@@ -1813,7 +1889,7 @@ let ctx_compute_decreases_proof_name (meta : T.item_meta) (ctx : extraction_ctx)
   let suffix =
     match Config.backend () with
     | Lean -> "_decreases"
-    | FStar | Coq | HOL4 -> [%craise] meta.span "Unexpected"
+    | FStar | Coq | HOL4 | Isabelle -> [%craise] meta.span "Unexpected"
   in
   (* Concatenate *)
   fname ^ lp_suffix ^ suffix
@@ -1852,7 +1928,7 @@ let ctx_compute_var_basename (span : Meta.span) (ctx : extraction_ctx)
       (* This should be a no-op *)
       match Config.backend () with
       | Lean -> basename
-      | FStar | Coq | HOL4 -> to_snake_case basename)
+      | FStar | Coq | HOL4 | Isabelle -> to_snake_case basename)
   | None -> (
       (* No basename: we use the first letter of the type *)
       match ty with
@@ -1884,7 +1960,7 @@ let ctx_compute_var_basename (span : Meta.span) (ctx : extraction_ctx)
           (* TODO: use "t" also for F* *)
           match backend () with
           | FStar -> "x" (* lacking inspiration here... *)
-          | Coq | Lean | HOL4 -> "t" (* lacking inspiration here... *))
+          | Coq | Lean | HOL4 | Isabelle -> "t" (* lacking inspiration here... *))
       | TLiteral lty -> (
           match lty with
           | TBool -> "b"
@@ -1903,7 +1979,7 @@ let ctx_compute_type_var_basename (_ctx : extraction_ctx) (basename : string) :
   | FStar ->
       (* This is *not* a no-op: this removes the capital letter *)
       to_snake_case basename
-  | HOL4 ->
+  | HOL4 | Isabelle ->
       (* In HOL4, type variable names must start with "'" *)
       "'" ^ to_snake_case basename
   | Coq | Lean -> basename
@@ -1913,7 +1989,7 @@ let ctx_compute_const_generic_var_basename (_ctx : extraction_ctx)
     (basename : string) : string =
   (* Rust type variables are snake-case and start with a capital letter *)
   match backend () with
-  | FStar | HOL4 ->
+  | FStar | HOL4 | Isabelle ->
       (* This is *not* a no-op: this removes the capital letter *)
       to_snake_case basename
   | Coq | Lean -> basename
@@ -1934,7 +2010,7 @@ let ctx_compute_trait_clause_basename (ctx : extraction_ctx)
   in
   let clause = clause ^ "Inst" in
   match backend () with
-  | FStar | Coq | HOL4 -> StringUtils.lowercase_first_letter clause
+  | FStar | Coq | HOL4 | Isabelle -> StringUtils.lowercase_first_letter clause
   | Lean -> clause
 
 let trait_self_clause_basename = "self_clause"

@@ -27,7 +27,7 @@ let split_on_separator (s : string) : string list =
 
 let flatten_name (name : string list) : string =
   match backend () with
-  | FStar | Coq | HOL4 -> String.concat "_" name
+  | FStar | Coq | HOL4 | Isabelle -> String.concat "_" name
   | Lean -> String.concat "." name
 
 (** Utility for Lean-only definitions **)
@@ -46,7 +46,7 @@ let () =
     or HOL4, and a different value if the target is Lean. *)
 let backend_choice (fstar_coq_hol4 : 'a) (lean : 'a) : 'a =
   match backend () with
-  | Coq | FStar | HOL4 -> fstar_coq_hol4
+  | Coq | FStar | HOL4 | Isabelle -> fstar_coq_hol4
   | Lean -> lean
 
 let builtin_globals () : (string * string) list =
@@ -80,12 +80,12 @@ let mk_struct_constructor (type_name : string) : string =
   let prefix =
     match backend () with
     | FStar -> "Mk"
-    | Coq | HOL4 -> "mk"
+    | Coq | HOL4 | Isabelle -> "mk"
     | Lean -> ""
   in
   let suffix =
     match backend () with
-    | FStar | Coq | HOL4 -> ""
+    | FStar | Coq | HOL4 | Isabelle -> ""
     | Lean -> ".mk"
   in
   prefix ^ type_name ^ suffix
@@ -120,7 +120,7 @@ let builtin_types () : Pure.builtin_type_info list =
                   in
                   match backend () with
                   | FStar | Lean -> name
-                  | Coq | HOL4 -> extract_name ^ "_" ^ name ))
+                  | Coq | HOL4 | Isabelle -> extract_name ^ "_" ^ name ))
               fields
           in
           let constructor = mk_struct_constructor extract_name in
@@ -136,7 +136,7 @@ let builtin_types () : Pure.builtin_type_info list =
                 in
                 let extract_variant_name =
                   match backend () with
-                  | FStar | Coq -> extract_name ^ "_" ^ evariant
+                  | FStar | Coq | Isabelle -> extract_name ^ "_" ^ evariant
                   | Lean -> extract_name ^ "." ^ evariant
                   | HOL4 -> extract_name ^ evariant
                 in
@@ -180,7 +180,7 @@ let builtin_types () : Pure.builtin_type_info list =
       extract_name =
         (match backend () with
         | Lean -> "Option"
-        | Coq | FStar | HOL4 -> "option");
+        | Coq | FStar | HOL4 | Isabelle -> "option");
       keep_params = None;
       body_info =
         Some
@@ -190,7 +190,7 @@ let builtin_types () : Pure.builtin_type_info list =
                  rust_variant_name = "None";
                  extract_variant_name =
                    (match backend () with
-                   | FStar | Coq -> "None"
+                   | FStar | Coq | Isabelle -> "None"
                    | Lean -> "none"
                    | HOL4 -> "NONE");
                  fields = None;
@@ -199,7 +199,7 @@ let builtin_types () : Pure.builtin_type_info list =
                  rust_variant_name = "Some";
                  extract_variant_name =
                    (match backend () with
-                   | FStar | Coq -> "Some"
+                   | FStar | Coq | Isabelle -> "Some"
                    | Lean -> "some"
                    | HOL4 -> "SOME");
                  fields = None;
@@ -284,7 +284,7 @@ let builtin_trait_decls_info () =
         in
         let type_name =
           match backend () with
-          | FStar | Coq | HOL4 -> StringUtils.lowercase_first_letter type_name
+          | FStar | Coq | HOL4 | Isabelle -> StringUtils.lowercase_first_letter type_name
           | Lean -> type_name
         in
         (item_name, type_name)

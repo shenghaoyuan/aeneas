@@ -25,7 +25,7 @@ let extract_raise (file : string) (line : int) (span : Meta.span) (msg : string)
 let admit () =
   match Config.backend () with
   | Coq | FStar | HOL4 -> "admit"
-  | Lean -> "sorry"
+  | Lean | Isabelle -> "sorry"
 
 let admit_raise_opt_span (file : string) (line : int) (span : Meta.span option)
     (msg : string) (fmt : Format.formatter) : unit =
