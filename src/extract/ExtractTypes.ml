@@ -820,7 +820,7 @@ let extract_type_decl_variant (span : Meta.span) (ctx : extraction_ctx)
     (* Print the arrow [->] *)
     if backend () <> HOL4 then 
     if backend() = Isabelle then (* Isabelle use "of" in multiple fields *)
-      if List.length fields > 1 && fid < List.length fields - 1 then (
+      if List.length fields > 1 && FieldId.to_int fid < (List.length fields) - 1 then (
           F.pp_print_space fmt ();
           F.pp_print_string fmt "of";
           F.pp_print_space fmt ())

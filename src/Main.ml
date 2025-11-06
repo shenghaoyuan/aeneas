@@ -357,7 +357,16 @@ let () =
             (* We don't support fuel for the HOL4 backend *)
             if !use_fuel then (
               log#error "The HOL4 backend doesn't support the -use-fuel option";
-              fail true))
+              fail true)
+				| Isabelle ->
+						(* We don't support fuel for the Isabelle backend *)
+						check_not !use_fuel
+							"The Isabelle backend doesn't support the -use-fuel option";
+						(* Isabelle can disambiguate field names *)
+						record_fields_short_names := true;
+						(* Optimizations that are likely beneficial for Isabelle *)
+						merge_let_app_decompose_tuple := true;
+						lift_pure_function_calls := true)
   in
 
   (* Retrieve and check the filename *)

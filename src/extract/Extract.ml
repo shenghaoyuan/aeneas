@@ -3270,7 +3270,7 @@ let extract_trait_impl (ctx : extraction_ctx) (fmt : F.formatter)
   else (
     if backend () = Lean then F.pp_print_string fmt ":= {"
     else if backend () = Coq then F.pp_print_string fmt ":= {|"
-    else if backend () = Isabelle then F.pp_print_string fmt "where \"" ^ impl_name ^ " = (|"
+    else if backend () = Isabelle then F.pp_print_string fmt ("where \"" ^ impl_name ^ " = (|")
     else F.pp_print_string fmt "= {";
 
     (* Close the box for the name + generics *)

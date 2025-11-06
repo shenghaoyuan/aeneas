@@ -415,7 +415,7 @@ let use_tuple_structs = ref true
 let backend_has_tuple_projectors backend =
   match backend with
   | Lean -> true
-  | Coq | FStar | HOL4 -> false
+  | Coq | FStar | HOL4 | Isabelle-> false
 
 (** Toggle the use of tuple projectors *)
 let use_tuple_projectors = ref false

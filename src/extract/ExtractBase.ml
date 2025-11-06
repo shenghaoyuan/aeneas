@@ -1380,7 +1380,7 @@ let type_decl_kind_to_qualif (span : Meta.span) (kind : decl_kind)
       | Declared -> Some "axiom")
   | Isabelle -> (
       match (kind, type_kind) with
-      | SingleNonRec, Some Typle -> Some "abbreviation"
+      | SingleNonRec, Some Tuple -> Some "abbreviation"
       | SingleNonRec, Some Enum -> Some "datatype"
       | SingleNonRec, Some Struct -> Some "record"
       | (SingleRec | MutRecFirst), Some _ ->

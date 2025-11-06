@@ -364,7 +364,7 @@ let rec let_group_requires_parentheses (span : Meta.span) (e : texpr) : bool =
 let texpr_requires_parentheses span e =
   match Config.backend () with
   | FStar | Lean -> false
-  | Coq | HOL4 -> let_group_requires_parentheses span e
+  | Coq | HOL4 | Isabelle -> let_group_requires_parentheses span e
 
 let is_fvar (e : texpr) : bool =
   match e.e with
@@ -1587,7 +1587,7 @@ let wrap_in_match_fuel (span : Meta.span) (fuel0 : FVarId.id) (fuel : FVarId.id)
       let match_e = Switch (check_fuel, If (fail_branch, success_branch)) in
       let match_ty = body.ty in
       { e = match_e; ty = match_ty }
-  | Coq ->
+  | Coq | Isabelle->
       (* Generate an expression:
          {[
            match fuel0 with
