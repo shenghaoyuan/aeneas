@@ -30,7 +30,7 @@ def CARRAY : Array U16 4#usize := eval_global CARRAY_body
 def loop_access_array_loop (k : Usize) (start : Usize) : Result Unit :=
   if start < 4#usize
   then
-    do
+    do {
     massert (k < 4#usize)
     let start1 ← start + 1#usize
     loop_access_array_loop k start1
@@ -59,7 +59,7 @@ def loop_array_len : Result Unit :=
 def loop_array_len_write_loop
   (b : Bool) (buf : Array U8 4#usize) : Result Unit :=
   if b
-  then do
+  then do {
        let buf1 ← write buf
        loop_array_len_write_loop true buf1
   else loop_array_len_write_loop false buf
@@ -86,14 +86,14 @@ partial_fixpoint
 /- [loops_issues::read_global_loop]:
    Source: 'tests/src/loops-issues.rs', lines 46:0-49:1 -/
 def read_global_loop (n_rows : Usize) : Result Unit :=
-  do
+  do {
   massert (n_rows <= MAX_NROWS)
   read_global_loop_loop
 
 /- [loops_issues::mut_loop_len]: loop 0:
    Source: '/rustc/library/core/src/macros/mod.rs', lines 290:8-292:9 -/
 def mut_loop_len_loop (buf : Array U8 4#usize) : Result Unit :=
-  do
+  do {
   let s ← (↑(Array.to_slice buf) : Result (Slice U8))
   let i := Slice.len s
   massert (0#usize <= i)
@@ -103,7 +103,7 @@ partial_fixpoint
 /- [loops_issues::mut_loop_len]:
    Source: 'tests/src/loops-issues.rs', lines 51:0-57:1 -/
 def mut_loop_len (i : U32) : Result U32 :=
-  do
+  do {
   let buf := Array.repeat 4#usize 0#u8
   mut_loop_len_loop buf
   ok i
@@ -112,11 +112,11 @@ def mut_loop_len (i : U32) : Result U32 :=
    Source: 'tests/src/loops-issues.rs', lines 64:4-70:5 -/
 def test_loop (b : Bool) (buf : Array U8 4#usize) : Result Unit :=
   if b
-  then do
+  then do {
        let buf1 ← write buf
        read buf1
        test_loop true buf1
-  else do
+  else do {
        read buf
        test_loop false buf
 partial_fixpoint

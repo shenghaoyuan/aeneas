@@ -10,8 +10,8 @@ namespace polonius_list
 
 /- [polonius_list::List]
    Source: 'tests/src/polonius_list.rs', lines 6:0-9:1 -/
-inductive List (T : Type) where
-| Cons : T → List T → List T
+inductive List where
+| Cons : T List T List T
 | Nil : List T
 
 /- [polonius_list::get_list_at_x]:
@@ -23,7 +23,7 @@ def get_list_at_x
     if hd = x
     then ok (ls, fun ret => ret)
     else
-      do
+      do {
       let (l, get_list_at_x_back) ← get_list_at_x tl x
       let back := fun ret => let tl1 := get_list_at_x_back ret
                              List.Cons hd tl1

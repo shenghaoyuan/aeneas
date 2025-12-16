@@ -9,7 +9,7 @@ include RenameAttribute.Clauses
 
 (** [rename_attribute::BoolTrait::ret_true]:
     Source: 'tests/src/rename_attribute.rs', lines 16:4-18:5 *)
-let boolTrait_retTest_default (#self : Type0) (self1 : self) : result bool =
+let boolTrait_retTest_default (self1 : self) : result bool =
   Ok true
 
 (** [rename_attribute::{rename_attribute::BoolTrait for bool}::get_bool]:
@@ -31,7 +31,7 @@ let boolImpl : boolTest_t bool = {
 
 (** [rename_attribute::test_bool_trait]:
     Source: 'tests/src/rename_attribute.rs', lines 29:0-31:1 *)
-let boolFn (t : Type0) (x : bool) : result bool =
+let boolFn (x : bool) : result bool =
   let* b = boolTraitBool_getTest x in
   if b then boolTraitBool_retTest x else Ok false
 

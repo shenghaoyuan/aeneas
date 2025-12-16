@@ -73,7 +73,7 @@ Definition sum_with_shared_borrows (n : nat) (max : u32) : result u32 :=
 (** [loops::sum_array]: loop 0:
     Source: 'tests/src/loops.rs', lines 57:4-60:5 *)
 Fixpoint sum_array_loop
-  {N : usize} (n : nat) (a : array u32 N) (i : usize) (s : u32) : result u32 :=
+  (n : nat) (a : array u32 N) (i : usize) (s : u32) : result u32 :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -89,7 +89,7 @@ Fixpoint sum_array_loop
 
 (** [loops::sum_array]:
     Source: 'tests/src/loops.rs', lines 54:0-62:1 *)
-Definition sum_array {N : usize} (n : nat) (a : array u32 N) : result u32 :=
+Definition sum_array (n : nat) (a : array u32 N) : result u32 :=
   sum_array_loop n a 0%usize 0%u32
 .
 
@@ -123,10 +123,7 @@ Definition clear
 
 (** [loops::List]
     Source: 'tests/src/loops.rs', lines 74:0-77:1 *)
-Inductive List_t (T : Type) :=
-| List_Cons : T -> List_t T -> List_t T
-| List_Nil : List_t T
-.
+Inductive List_t := | List_Cons : T List_t T List_t T | List_Nil : List_t T.
 
 Arguments List_Cons { _ }.
 Arguments List_Nil { _ }.
@@ -153,9 +150,7 @@ Definition list_mem (n : nat) (x : u32) (ls : List_t u32) : result bool :=
 (** [loops::list_nth_mut_loop]: loop 0:
     Source: 'tests/src/loops.rs', lines 93:4-102:1 *)
 Fixpoint list_nth_mut_loop_loop
-  {T : Type} (n : nat) (ls : List_t T) (i : u32) :
-  result (T * (T -> List_t T))
-  :=
+  (n : nat) (ls : List_t T) (i : u32) : result (T * (T -> List_t T)) :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -177,16 +172,14 @@ Fixpoint list_nth_mut_loop_loop
 (** [loops::list_nth_mut_loop]:
     Source: 'tests/src/loops.rs', lines 92:0-102:1 *)
 Definition list_nth_mut_loop
-  {T : Type} (n : nat) (ls : List_t T) (i : u32) :
-  result (T * (T -> List_t T))
-  :=
+  (n : nat) (ls : List_t T) (i : u32) : result (T * (T -> List_t T)) :=
   list_nth_mut_loop_loop n ls i
 .
 
 (** [loops::list_nth_shared_loop]: loop 0:
     Source: 'tests/src/loops.rs', lines 106:4-115:1 *)
 Fixpoint list_nth_shared_loop_loop
-  {T : Type} (n : nat) (ls : List_t T) (i : u32) : result T :=
+  (n : nat) (ls : List_t T) (i : u32) : result T :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -203,7 +196,7 @@ Fixpoint list_nth_shared_loop_loop
 (** [loops::list_nth_shared_loop]:
     Source: 'tests/src/loops.rs', lines 105:0-115:1 *)
 Definition list_nth_shared_loop
-  {T : Type} (n : nat) (ls : List_t T) (i : u32) : result T :=
+  (n : nat) (ls : List_t T) (i : u32) : result T :=
   list_nth_shared_loop_loop n ls i
 .
 
@@ -277,21 +270,19 @@ Definition get_elem_shared
 (** [loops::id_mut]:
     Source: 'tests/src/loops.rs', lines 149:0-151:1 *)
 Definition id_mut
-  {T : Type} (ls : List_t T) : result ((List_t T) * (List_t T -> List_t T)) :=
+  (ls : List_t T) : result ((List_t T) * (List_t T -> List_t T)) :=
   Ok (ls, fun (ret : List_t T) => ret)
 .
 
 (** [loops::id_shared]:
     Source: 'tests/src/loops.rs', lines 153:0-155:1 *)
-Definition id_shared {T : Type} (ls : List_t T) : result (List_t T) :=
+Definition id_shared (ls : List_t T) : result (List_t T) :=
   Ok ls.
 
 (** [loops::list_nth_mut_loop_with_id]: loop 0:
     Source: 'tests/src/loops.rs', lines 160:4-169:1 *)
 Fixpoint list_nth_mut_loop_with_id_loop
-  {T : Type} (n : nat) (i : u32) (ls : List_t T) :
-  result (T * (T -> List_t T))
-  :=
+  (n : nat) (i : u32) (ls : List_t T) : result (T * (T -> List_t T)) :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -313,9 +304,7 @@ Fixpoint list_nth_mut_loop_with_id_loop
 (** [loops::list_nth_mut_loop_with_id]:
     Source: 'tests/src/loops.rs', lines 158:0-169:1 *)
 Definition list_nth_mut_loop_with_id
-  {T : Type} (n : nat) (ls : List_t T) (i : u32) :
-  result (T * (T -> List_t T))
-  :=
+  (n : nat) (ls : List_t T) (i : u32) : result (T * (T -> List_t T)) :=
   p <- id_mut ls;
   let (ls1, id_mut_back) := p in
   p1 <- list_nth_mut_loop_with_id_loop n i ls1;
@@ -327,7 +316,7 @@ Definition list_nth_mut_loop_with_id
 (** [loops::list_nth_shared_loop_with_id]: loop 0:
     Source: 'tests/src/loops.rs', lines 174:4-183:1 *)
 Fixpoint list_nth_shared_loop_with_id_loop
-  {T : Type} (n : nat) (i : u32) (ls : List_t T) : result T :=
+  (n : nat) (i : u32) (ls : List_t T) : result T :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -344,14 +333,14 @@ Fixpoint list_nth_shared_loop_with_id_loop
 (** [loops::list_nth_shared_loop_with_id]:
     Source: 'tests/src/loops.rs', lines 172:0-183:1 *)
 Definition list_nth_shared_loop_with_id
-  {T : Type} (n : nat) (ls : List_t T) (i : u32) : result T :=
+  (n : nat) (ls : List_t T) (i : u32) : result T :=
   ls1 <- id_shared ls; list_nth_shared_loop_with_id_loop n i ls1
 .
 
 (** [loops::list_nth_mut_loop_pair]: loop 0:
     Source: 'tests/src/loops.rs', lines 194:8-194:24 *)
 Fixpoint list_nth_mut_loop_pair_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T) * (T -> List_t T))
   :=
   match n with
@@ -387,7 +376,7 @@ Fixpoint list_nth_mut_loop_pair_loop
 (** [loops::list_nth_mut_loop_pair]:
     Source: 'tests/src/loops.rs', lines 188:0-209:1 *)
 Definition list_nth_mut_loop_pair
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T) * (T -> List_t T))
   :=
   list_nth_mut_loop_pair_loop n ls0 ls1 i
@@ -396,9 +385,7 @@ Definition list_nth_mut_loop_pair
 (** [loops::list_nth_shared_loop_pair]: loop 0:
     Source: 'tests/src/loops.rs', lines 218:8-218:24 *)
 Fixpoint list_nth_shared_loop_pair_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
-  result (T * T)
-  :=
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) : result (T * T) :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -420,16 +407,14 @@ Fixpoint list_nth_shared_loop_pair_loop
 (** [loops::list_nth_shared_loop_pair]:
     Source: 'tests/src/loops.rs', lines 212:0-233:1 *)
 Definition list_nth_shared_loop_pair
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
-  result (T * T)
-  :=
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) : result (T * T) :=
   list_nth_shared_loop_pair_loop n ls0 ls1 i
 .
 
 (** [loops::list_nth_mut_loop_pair_merge]: loop 0:
     Source: 'tests/src/loops.rs', lines 242:4-252:1 *)
 Fixpoint list_nth_mut_loop_pair_merge_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * ((T * T) -> ((List_t T) * (List_t T))))
   :=
   match n with
@@ -466,7 +451,7 @@ Fixpoint list_nth_mut_loop_pair_merge_loop
 (** [loops::list_nth_mut_loop_pair_merge]:
     Source: 'tests/src/loops.rs', lines 237:0-252:1 *)
 Definition list_nth_mut_loop_pair_merge
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * ((T * T) -> ((List_t T) * (List_t T))))
   :=
   list_nth_mut_loop_pair_merge_loop n ls0 ls1 i
@@ -475,9 +460,7 @@ Definition list_nth_mut_loop_pair_merge
 (** [loops::list_nth_shared_loop_pair_merge]: loop 0:
     Source: 'tests/src/loops.rs', lines 260:4-270:1 *)
 Fixpoint list_nth_shared_loop_pair_merge_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
-  result (T * T)
-  :=
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) : result (T * T) :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -500,16 +483,14 @@ Fixpoint list_nth_shared_loop_pair_merge_loop
 (** [loops::list_nth_shared_loop_pair_merge]:
     Source: 'tests/src/loops.rs', lines 255:0-270:1 *)
 Definition list_nth_shared_loop_pair_merge
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
-  result (T * T)
-  :=
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) : result (T * T) :=
   list_nth_shared_loop_pair_merge_loop n ls0 ls1 i
 .
 
 (** [loops::list_nth_mut_shared_loop_pair]: loop 0:
     Source: 'tests/src/loops.rs', lines 278:4-288:1 *)
 Fixpoint list_nth_mut_shared_loop_pair_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   match n with
@@ -540,7 +521,7 @@ Fixpoint list_nth_mut_shared_loop_pair_loop
 (** [loops::list_nth_mut_shared_loop_pair]:
     Source: 'tests/src/loops.rs', lines 273:0-288:1 *)
 Definition list_nth_mut_shared_loop_pair
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   list_nth_mut_shared_loop_pair_loop n ls0 ls1 i
@@ -549,7 +530,7 @@ Definition list_nth_mut_shared_loop_pair
 (** [loops::list_nth_mut_shared_loop_pair_merge]: loop 0:
     Source: 'tests/src/loops.rs', lines 297:4-307:1 *)
 Fixpoint list_nth_mut_shared_loop_pair_merge_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   match n with
@@ -580,7 +561,7 @@ Fixpoint list_nth_mut_shared_loop_pair_merge_loop
 (** [loops::list_nth_mut_shared_loop_pair_merge]:
     Source: 'tests/src/loops.rs', lines 292:0-307:1 *)
 Definition list_nth_mut_shared_loop_pair_merge
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   list_nth_mut_shared_loop_pair_merge_loop n ls0 ls1 i
@@ -589,7 +570,7 @@ Definition list_nth_mut_shared_loop_pair_merge
 (** [loops::list_nth_shared_mut_loop_pair]: loop 0:
     Source: 'tests/src/loops.rs', lines 316:4-326:1 *)
 Fixpoint list_nth_shared_mut_loop_pair_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   match n with
@@ -620,7 +601,7 @@ Fixpoint list_nth_shared_mut_loop_pair_loop
 (** [loops::list_nth_shared_mut_loop_pair]:
     Source: 'tests/src/loops.rs', lines 311:0-326:1 *)
 Definition list_nth_shared_mut_loop_pair
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   list_nth_shared_mut_loop_pair_loop n ls0 ls1 i
@@ -629,7 +610,7 @@ Definition list_nth_shared_mut_loop_pair
 (** [loops::list_nth_shared_mut_loop_pair_merge]: loop 0:
     Source: 'tests/src/loops.rs', lines 335:4-345:1 *)
 Fixpoint list_nth_shared_mut_loop_pair_merge_loop
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   match n with
@@ -660,7 +641,7 @@ Fixpoint list_nth_shared_mut_loop_pair_merge_loop
 (** [loops::list_nth_shared_mut_loop_pair_merge]:
     Source: 'tests/src/loops.rs', lines 330:0-345:1 *)
 Definition list_nth_shared_mut_loop_pair_merge
-  {T : Type} (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
+  (n : nat) (ls0 : List_t T) (ls1 : List_t T) (i : u32) :
   result ((T * T) * (T -> List_t T))
   :=
   list_nth_shared_mut_loop_pair_merge_loop n ls0 ls1 i

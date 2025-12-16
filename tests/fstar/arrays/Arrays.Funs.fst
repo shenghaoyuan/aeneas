@@ -14,35 +14,33 @@ let incr (x : u32) : result u32 =
 
 (** [arrays::array_to_shared_slice_]:
     Source: 'tests/src/arrays.rs', lines 20:0-22:1 *)
-let array_to_shared_slice_ (#t : Type0) (s : array t 32) : result (slice t) =
+let array_to_shared_slice_ (s : array t 32) : result (slice t) =
   Ok (array_to_slice s)
 
 (** [arrays::array_to_mut_slice_]:
     Source: 'tests/src/arrays.rs', lines 25:0-27:1 *)
 let array_to_mut_slice_
-  (#t : Type0) (s : array t 32) :
-  result ((slice t) & (slice t -> array t 32))
-  =
+  (s : array t 32) : result ((slice t) & (slice t -> array t 32)) =
   Ok (array_to_slice_mut s)
 
 (** [arrays::array_len]:
     Source: 'tests/src/arrays.rs', lines 29:0-31:1 *)
-let array_len (#t : Type0) (s : array t 32) : result usize =
+let array_len (s : array t 32) : result usize =
   let s1 = array_to_slice s in Ok (slice_len s1)
 
 (** [arrays::shared_array_len]:
     Source: 'tests/src/arrays.rs', lines 33:0-35:1 *)
-let shared_array_len (#t : Type0) (s : array t 32) : result usize =
+let shared_array_len (s : array t 32) : result usize =
   let s1 = array_to_slice s in Ok (slice_len s1)
 
 (** [arrays::shared_slice_len]:
     Source: 'tests/src/arrays.rs', lines 37:0-39:1 *)
-let shared_slice_len (#t : Type0) (s : slice t) : result usize =
+let shared_slice_len (s : slice t) : result usize =
   Ok (slice_len s)
 
 (** [arrays::index_array_shared]:
     Source: 'tests/src/arrays.rs', lines 41:0-43:1 *)
-let index_array_shared (#t : Type0) (s : array t 32) (i : usize) : result t =
+let index_array_shared (s : array t 32) (i : usize) : result t =
   array_index_usize s i
 
 (** [arrays::index_array_u32]:
@@ -58,18 +56,17 @@ let index_array_copy (x : array u32 32) : result u32 =
 (** [arrays::index_mut_array]:
     Source: 'tests/src/arrays.rs', lines 56:0-58:1 *)
 let index_mut_array
-  (#t : Type0) (s : array t 32) (i : usize) : result (t & (t -> array t 32)) =
+  (s : array t 32) (i : usize) : result (t & (t -> array t 32)) =
   array_index_mut_usize s i
 
 (** [arrays::index_slice]:
     Source: 'tests/src/arrays.rs', lines 60:0-62:1 *)
-let index_slice (#t : Type0) (s : slice t) (i : usize) : result t =
+let index_slice (s : slice t) (i : usize) : result t =
   slice_index_usize s i
 
 (** [arrays::index_mut_slice]:
     Source: 'tests/src/arrays.rs', lines 64:0-66:1 *)
-let index_mut_slice
-  (#t : Type0) (s : slice t) (i : usize) : result (t & (t -> slice t)) =
+let index_mut_slice (s : slice t) (i : usize) : result (t & (t -> slice t)) =
   slice_index_mut_usize s i
 
 (** [arrays::slice_subslice_shared_]:
@@ -120,12 +117,12 @@ let array_subslice_mut_
 
 (** [arrays::index_slice_0]:
     Source: 'tests/src/arrays.rs', lines 92:0-94:1 *)
-let index_slice_0 (#t : Type0) (s : slice t) : result t =
+let index_slice_0 (s : slice t) : result t =
   slice_index_usize s 0
 
 (** [arrays::index_array_0]:
     Source: 'tests/src/arrays.rs', lines 96:0-98:1 *)
-let index_array_0 (#t : Type0) (s : array t 32) : result t =
+let index_array_0 (s : array t 32) : result t =
   array_index_usize s 0
 
 (** [arrays::index_index_array]:

@@ -1133,7 +1133,7 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
   let all_params = List.concat [ type_params; cg_params; trait_clauses ] in
   (* HOL4 doesn't support const generics *)
   [%cassert] span
-    (cg_params = [] || backend () <> HOL4 && backend () <> Isabelle)
+    (cg_params = [] || backend () <> HOL4)
     "Constant generics are not supported yet when generating code for HOL4";
   let left_bracket (explicit : explicit) =
     match backend () with

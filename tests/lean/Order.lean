@@ -11,9 +11,7 @@ namespace order
 /- [order::compare]:
    Source: 'tests/src/order.rs', lines 5:0-7:1 -/
 def compare
-  {T : Type} (corecmpOrdInst : core.cmp.Ord T) (x : T) (y : T) :
-  Result Ordering
-  :=
+  (corecmpOrdInst : core.cmp.Ord T) (x : T) (y : T) : Result Ordering :=
   corecmpOrdInst.cmp x y
 
 /- [order::u32_compare]:

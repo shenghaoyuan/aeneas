@@ -12,8 +12,8 @@ Module Betree_Types.
 
 (** [betree::betree::List]
     Source: 'src/betree.rs', lines 17:0-20:1 *)
-Inductive betree_List_t (T : Type) :=
-| Betree_List_Cons : T -> betree_List_t T -> betree_List_t T
+Inductive betree_List_t :=
+| Betree_List_Cons : T betree_List_t T betree_List_t T
 | Betree_List_Nil : betree_List_t T
 .
 
@@ -23,16 +23,16 @@ Arguments Betree_List_Nil { _ }.
 (** [betree::betree::UpsertFunState]
     Source: 'src/betree.rs', lines 63:0-66:1 *)
 Inductive betree_UpsertFunState_t :=
-| Betree_UpsertFunState_Add : u64 -> betree_UpsertFunState_t
-| Betree_UpsertFunState_Sub : u64 -> betree_UpsertFunState_t
+| Betree_UpsertFunState_Add : u64 betree_UpsertFunState_t
+| Betree_UpsertFunState_Sub : u64 betree_UpsertFunState_t
 .
 
 (** [betree::betree::Message]
     Source: 'src/betree.rs', lines 69:0-117:1 *)
 Inductive betree_Message_t :=
-| Betree_Message_Insert : u64 -> betree_Message_t
+| Betree_Message_Insert : u64 betree_Message_t
 | Betree_Message_Delete : betree_Message_t
-| Betree_Message_Upsert : betree_UpsertFunState_t -> betree_Message_t
+| Betree_Message_Upsert : betree_UpsertFunState_t betree_Message_t
 .
 
 (** [betree::betree::Leaf]
@@ -46,18 +46,13 @@ mkbetree_Leaf_t {
 (** [betree::betree::Internal]
     Source: 'src/betree.rs', lines 156:0-161:1 *)
 Inductive betree_Internal_t :=
-| mkbetree_Internal_t :
-  u64 ->
-  u64 ->
-  betree_Node_t ->
-  betree_Node_t ->
-  betree_Internal_t
+| mkbetree_Internal_t : u64 u64 betree_Node_t betree_Node_t betree_Internal_t
 
 (** [betree::betree::Node]
     Source: 'src/betree.rs', lines 179:0-184:1 *)
 with betree_Node_t :=
-| Betree_Node_Internal : betree_Internal_t -> betree_Node_t
-| Betree_Node_Leaf : betree_Leaf_t -> betree_Node_t
+| Betree_Node_Internal : betree_Internal_t betree_Node_t
+| Betree_Node_Leaf : betree_Leaf_t betree_Node_t
 .
 
 Definition betree_Internal_id (x : betree_Internal_t) :=

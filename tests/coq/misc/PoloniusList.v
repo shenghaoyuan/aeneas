@@ -10,10 +10,7 @@ Module PoloniusList.
 
 (** [polonius_list::List]
     Source: 'tests/src/polonius_list.rs', lines 6:0-9:1 *)
-Inductive List_t (T : Type) :=
-| List_Cons : T -> List_t T -> List_t T
-| List_Nil : List_t T
-.
+Inductive List_t := | List_Cons : T List_t T List_t T | List_Nil : List_t T.
 
 Arguments List_Cons { _ }.
 Arguments List_Nil { _ }.

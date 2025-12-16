@@ -5,19 +5,21 @@ type t =
   | Lean
   | FStar
   | HOL4
+  | Isabelle
   | BorrowCheck
       (** Borrow check: no backend. We use this when we only want to
           borrow-check the program *)
 [@@deriving ord, sexp]
 
 (* TODO: reactivate HOL4 once traits are parameterized by their associated types *)
-let all = [ Coq; Lean; FStar; BorrowCheck ]
+let all = [ Coq; Lean; FStar; Isabelle; BorrowCheck ]
 
 let of_string = function
   | "coq" -> Coq
   | "lean" -> Lean
   | "fstar" -> FStar
   | "hol4" -> HOL4
+  | "isabelle" -> Isabelle
   | "borrow-check" -> BorrowCheck
   | backend -> failwith ("Unknown backend: `" ^ backend ^ "`")
 
@@ -26,6 +28,7 @@ let to_string = function
   | Lean -> "lean"
   | FStar -> "fstar"
   | HOL4 -> "hol4"
+  | Isabelle -> "isabelle"
   | BorrowCheck -> "borrow-check"
 
 let to_command = function

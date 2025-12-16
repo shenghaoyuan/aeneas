@@ -10,8 +10,8 @@ namespace issue_270_loop_list
 
 /- [issue_270_loop_list::List]
    Source: 'tests/src/issue-270-loop-list.rs', lines 2:0-5:1 -/
-inductive List (T : Type) where
-| Cons : T → List T → List T
+inductive List where
+| Cons : T List T List T
 | Nil : List T
 
 /- [issue_270_loop_list::foo]: loop 0:

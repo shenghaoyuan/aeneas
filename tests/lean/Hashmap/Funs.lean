@@ -44,12 +44,12 @@ def core.marker.CopyhashmapFraction : core.marker.Copy Fraction := {
 /- [hashmap::{hashmap::HashMap<T>}::allocate_slots]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 68:8-71:9 -/
 def HashMap.allocate_slots_loop
-  {T : Type} (slots : alloc.vec.Vec (AList T)) (n : Usize) :
+  (slots : alloc.vec.Vec (AList T)) (n : Usize) :
   Result (alloc.vec.Vec (AList T))
   :=
   if n > 0#usize
   then
-    do
+    do {
     let slots1 ← alloc.vec.Vec.push slots AList.Nil
     let n1 ← n - 1#usize
     HashMap.allocate_slots_loop slots1 n1
@@ -60,7 +60,7 @@ partial_fixpoint
    Source: 'tests/src/hashmap.rs', lines 67:4-73:5 -/
 @[reducible]
 def HashMap.allocate_slots
-  {T : Type} (slots : alloc.vec.Vec (AList T)) (n : Usize) :
+  (slots : alloc.vec.Vec (AList T)) (n : Usize) :
   Result (alloc.vec.Vec (AList T))
   :=
   HashMap.allocate_slots_loop slots n
@@ -68,10 +68,8 @@ def HashMap.allocate_slots
 /- [hashmap::{hashmap::HashMap<T>}::new_with_capacity]:
    Source: 'tests/src/hashmap.rs', lines 76:4-87:5 -/
 def HashMap.new_with_capacity
-  (T : Type) (capacity : Usize) (max_load_factor : Fraction) :
-  Result (HashMap T)
-  :=
-  do
+  (capacity : Usize) (max_load_factor : Fraction) : Result (HashMap T) :=
+  do {
   let slots ← HashMap.allocate_slots (alloc.vec.Vec.new (AList T)) capacity
   let i ← capacity * max_load_factor.dividend
   let i1 ← i / max_load_factor.divisor
@@ -86,20 +84,20 @@ def HashMap.new_with_capacity
 
 /- [hashmap::{hashmap::HashMap<T>}::new]:
    Source: 'tests/src/hashmap.rs', lines 89:4-98:5 -/
-def HashMap.new (T : Type) : Result (HashMap T) :=
+def HashMap.new : Result (HashMap T) :=
   HashMap.new_with_capacity T 32#usize
     { dividend := 4#usize, divisor := 5#usize }
 
 /- [hashmap::{hashmap::HashMap<T>}::clear]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 104:8-107:9 -/
 def HashMap.clear_loop
-  {T : Type} (slots : alloc.vec.Vec (AList T)) (i : Usize) :
+  (slots : alloc.vec.Vec (AList T)) (i : Usize) :
   Result (alloc.vec.Vec (AList T))
   :=
   let i1 := alloc.vec.Vec.len slots
   if i < i1
   then
-    do
+    do {
     let (_, index_mut_back) ←
       alloc.vec.Vec.index_mut (core.slice.index.SliceIndexUsizeSliceInst (AList
         T)) slots i
@@ -111,28 +109,26 @@ partial_fixpoint
 
 /- [hashmap::{hashmap::HashMap<T>}::clear]:
    Source: 'tests/src/hashmap.rs', lines 100:4-108:5 -/
-def HashMap.clear {T : Type} (self : HashMap T) : Result (HashMap T) :=
-  do
+def HashMap.clear (self : HashMap T) : Result (HashMap T) :=
+  do {
   let slots ← HashMap.clear_loop self.slots 0#usize
   ok { self with num_entries := 0#usize, slots }
 
 /- [hashmap::{hashmap::HashMap<T>}::len]:
    Source: 'tests/src/hashmap.rs', lines 110:4-112:5 -/
-def HashMap.len {T : Type} (self : HashMap T) : Result Usize :=
+def HashMap.len (self : HashMap T) : Result Usize :=
   ok self.num_entries
 
 /- [hashmap::{hashmap::HashMap<T>}::insert_in_list]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 1:0-133:9 -/
 def HashMap.insert_in_list_loop
-  {T : Type} (key : Usize) (value : T) (ls : AList T) :
-  Result (Bool × (AList T))
-  :=
+  (key : Usize) (value : T) (ls : AList T) : Result (Bool × (AList T)) :=
   match ls with
   | AList.Cons ckey cvalue tl =>
     if ckey = key
     then ok (false, AList.Cons ckey value tl)
     else
-      do
+      do {
       let (b, tl1) ← HashMap.insert_in_list_loop key value tl
       ok (b, AList.Cons ckey cvalue tl1)
   | AList.Nil => ok (true, AList.Cons key value AList.Nil)
@@ -142,18 +138,14 @@ partial_fixpoint
    Source: 'tests/src/hashmap.rs', lines 117:4-134:5 -/
 @[reducible]
 def HashMap.insert_in_list
-  {T : Type} (key : Usize) (value : T) (ls : AList T) :
-  Result (Bool × (AList T))
-  :=
+  (key : Usize) (value : T) (ls : AList T) : Result (Bool × (AList T)) :=
   HashMap.insert_in_list_loop key value ls
 
 /- [hashmap::{hashmap::HashMap<T>}::insert_no_resize]:
    Source: 'tests/src/hashmap.rs', lines 137:4-145:5 -/
 def HashMap.insert_no_resize
-  {T : Type} (self : HashMap T) (key : Usize) (value : T) :
-  Result (HashMap T)
-  :=
-  do
+  (self : HashMap T) (key : Usize) (value : T) : Result (HashMap T) :=
+  do {
   let hash ← hash_key key
   let i := alloc.vec.Vec.len self.slots
   let hash_mod ← hash % i
@@ -163,7 +155,7 @@ def HashMap.insert_no_resize
   let (inserted, a1) ← HashMap.insert_in_list key value a
   if inserted
   then
-    do
+    do {
     let i1 ← self.num_entries + 1#usize
     let v := index_mut_back a1
     ok { self with num_entries := i1, slots := v }
@@ -173,10 +165,10 @@ def HashMap.insert_no_resize
 /- [hashmap::{hashmap::HashMap<T>}::move_elements_from_list]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 199:12-206:17 -/
 def HashMap.move_elements_from_list_loop
-  {T : Type} (ntable : HashMap T) (ls : AList T) : Result (HashMap T) :=
+  (ntable : HashMap T) (ls : AList T) : Result (HashMap T) :=
   match ls with
   | AList.Cons k v tl =>
-    do
+    do {
     let ntable1 ← HashMap.insert_no_resize ntable k v
     HashMap.move_elements_from_list_loop ntable1 tl
   | AList.Nil => ok ntable
@@ -186,20 +178,19 @@ partial_fixpoint
    Source: 'tests/src/hashmap.rs', lines 196:4-209:5 -/
 @[reducible]
 def HashMap.move_elements_from_list
-  {T : Type} (ntable : HashMap T) (ls : AList T) : Result (HashMap T) :=
+  (ntable : HashMap T) (ls : AList T) : Result (HashMap T) :=
   HashMap.move_elements_from_list_loop ntable ls
 
 /- [hashmap::{hashmap::HashMap<T>}::move_elements]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 185:8-192:9 -/
 def HashMap.move_elements_loop
-  {T : Type} (ntable : HashMap T) (slots : alloc.vec.Vec (AList T)) (i : Usize)
-  :
+  (ntable : HashMap T) (slots : alloc.vec.Vec (AList T)) (i : Usize) :
   Result ((HashMap T) × (alloc.vec.Vec (AList T)))
   :=
   let i1 := alloc.vec.Vec.len slots
   if i < i1
   then
-    do
+    do {
     let (a, index_mut_back) ←
       alloc.vec.Vec.index_mut (core.slice.index.SliceIndexUsizeSliceInst (AList
         T)) slots i
@@ -215,21 +206,21 @@ partial_fixpoint
    Source: 'tests/src/hashmap.rs', lines 183:4-193:5 -/
 @[reducible]
 def HashMap.move_elements
-  {T : Type} (ntable : HashMap T) (slots : alloc.vec.Vec (AList T)) :
+  (ntable : HashMap T) (slots : alloc.vec.Vec (AList T)) :
   Result ((HashMap T) × (alloc.vec.Vec (AList T)))
   :=
   HashMap.move_elements_loop ntable slots 0#usize
 
 /- [hashmap::{hashmap::HashMap<T>}::try_resize]:
    Source: 'tests/src/hashmap.rs', lines 160:4-179:5 -/
-def HashMap.try_resize {T : Type} (self : HashMap T) : Result (HashMap T) :=
-  do
+def HashMap.try_resize (self : HashMap T) : Result (HashMap T) :=
+  do {
   let capacity := alloc.vec.Vec.len self.slots
   let n1 ← core.num.Usize.MAX / 2#usize
   let i ← n1 / self.max_load_factor.dividend
   if capacity <= i
   then
-    do
+    do {
     let i1 ← capacity * 2#usize
     let ntable ← HashMap.new_with_capacity T i1 self.max_load_factor
     let (ntable1, _) ← HashMap.move_elements ntable self.slots
@@ -239,10 +230,8 @@ def HashMap.try_resize {T : Type} (self : HashMap T) : Result (HashMap T) :=
 /- [hashmap::{hashmap::HashMap<T>}::insert]:
    Source: 'tests/src/hashmap.rs', lines 149:4-156:5 -/
 def HashMap.insert
-  {T : Type} (self : HashMap T) (key : Usize) (value : T) :
-  Result (HashMap T)
-  :=
-  do
+  (self : HashMap T) (key : Usize) (value : T) : Result (HashMap T) :=
+  do {
   let self1 ← HashMap.insert_no_resize self key value
   let i ← HashMap.len self1
   if i > self1.max_load
@@ -254,7 +243,7 @@ def HashMap.insert
 /- [hashmap::{hashmap::HashMap<T>}::contains_key_in_list]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 1:0-231:9 -/
 def HashMap.contains_key_in_list_loop
-  {T : Type} (key : Usize) (ls : AList T) : Result Bool :=
+  (key : Usize) (ls : AList T) : Result Bool :=
   match ls with
   | AList.Cons ckey _ tl =>
     if ckey = key
@@ -266,15 +255,13 @@ partial_fixpoint
 /- [hashmap::{hashmap::HashMap<T>}::contains_key_in_list]:
    Source: 'tests/src/hashmap.rs', lines 219:4-232:5 -/
 @[reducible]
-def HashMap.contains_key_in_list
-  {T : Type} (key : Usize) (ls : AList T) : Result Bool :=
+def HashMap.contains_key_in_list (key : Usize) (ls : AList T) : Result Bool :=
   HashMap.contains_key_in_list_loop key ls
 
 /- [hashmap::{hashmap::HashMap<T>}::contains_key]:
    Source: 'tests/src/hashmap.rs', lines 212:4-216:5 -/
-def HashMap.contains_key
-  {T : Type} (self : HashMap T) (key : Usize) : Result Bool :=
-  do
+def HashMap.contains_key (self : HashMap T) (key : Usize) : Result Bool :=
+  do {
   let hash ← hash_key key
   let i := alloc.vec.Vec.len self.slots
   let hash_mod ← hash % i
@@ -286,7 +273,7 @@ def HashMap.contains_key
 /- [hashmap::{hashmap::HashMap<T>}::get_in_list]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 238:8-246:5 -/
 def HashMap.get_in_list_loop
-  {T : Type} (key : Usize) (ls : AList T) : Result (Option T) :=
+  (key : Usize) (ls : AList T) : Result (Option T) :=
   match ls with
   | AList.Cons ckey cvalue tl =>
     if ckey = key
@@ -298,15 +285,13 @@ partial_fixpoint
 /- [hashmap::{hashmap::HashMap<T>}::get_in_list]:
    Source: 'tests/src/hashmap.rs', lines 237:4-246:5 -/
 @[reducible]
-def HashMap.get_in_list
-  {T : Type} (key : Usize) (ls : AList T) : Result (Option T) :=
+def HashMap.get_in_list (key : Usize) (ls : AList T) : Result (Option T) :=
   HashMap.get_in_list_loop key ls
 
 /- [hashmap::{hashmap::HashMap<T>}::get]:
    Source: 'tests/src/hashmap.rs', lines 248:4-252:5 -/
-def HashMap.get
-  {T : Type} (self : HashMap T) (key : Usize) : Result (Option T) :=
-  do
+def HashMap.get (self : HashMap T) (key : Usize) : Result (Option T) :=
+  do {
   let hash ← hash_key key
   let i := alloc.vec.Vec.len self.slots
   let hash_mod ← hash % i
@@ -318,7 +303,7 @@ def HashMap.get
 /- [hashmap::{hashmap::HashMap<T>}::get_mut_in_list]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 255:8-263:5 -/
 def HashMap.get_mut_in_list_loop
-  {T : Type} (ls : AList T) (key : Usize) :
+  (ls : AList T) (key : Usize) :
   Result ((Option T) × (Option T → AList T))
   :=
   match ls with
@@ -333,7 +318,7 @@ def HashMap.get_mut_in_list_loop
           AList.Cons ckey t tl
       ok (some cvalue, back)
     else
-      do
+      do {
       let (o, back) ← HashMap.get_mut_in_list_loop tl key
       let back1 := fun ret => let tl1 := back ret
                               AList.Cons ckey cvalue tl1
@@ -346,7 +331,7 @@ partial_fixpoint
    Source: 'tests/src/hashmap.rs', lines 254:4-263:5 -/
 @[reducible]
 def HashMap.get_mut_in_list
-  {T : Type} (ls : AList T) (key : Usize) :
+  (ls : AList T) (key : Usize) :
   Result ((Option T) × (Option T → AList T))
   :=
   HashMap.get_mut_in_list_loop ls key
@@ -354,10 +339,10 @@ def HashMap.get_mut_in_list
 /- [hashmap::{hashmap::HashMap<T>}::get_mut]:
    Source: 'tests/src/hashmap.rs', lines 266:4-270:5 -/
 def HashMap.get_mut
-  {T : Type} (self : HashMap T) (key : Usize) :
+  (self : HashMap T) (key : Usize) :
   Result ((Option T) × (Option T → HashMap T))
   :=
-  do
+  do {
   let hash ← hash_key key
   let i := alloc.vec.Vec.len self.slots
   let hash_mod ← hash % i
@@ -375,7 +360,7 @@ def HashMap.get_mut
 /- [hashmap::{hashmap::HashMap<T>}::remove_from_list]: loop 0:
    Source: 'tests/src/hashmap.rs', lines 1:0-297:17 -/
 def HashMap.remove_from_list_loop
-  {T : Type} (key : Usize) (ls : AList T) : Result ((Option T) × (AList T)) :=
+  (key : Usize) (ls : AList T) : Result ((Option T) × (AList T)) :=
   match ls with
   | AList.Cons ckey t tl =>
     if ckey = key
@@ -385,7 +370,7 @@ def HashMap.remove_from_list_loop
       | AList.Cons _ cvalue tl1 => ok (some cvalue, tl1)
       | AList.Nil => fail panic
     else
-      do
+      do {
       let (o, tl1) ← HashMap.remove_from_list_loop key tl
       ok (o, AList.Cons ckey t tl1)
   | AList.Nil => ok (none, AList.Nil)
@@ -395,16 +380,14 @@ partial_fixpoint
    Source: 'tests/src/hashmap.rs', lines 274:4-300:5 -/
 @[reducible]
 def HashMap.remove_from_list
-  {T : Type} (key : Usize) (ls : AList T) : Result ((Option T) × (AList T)) :=
+  (key : Usize) (ls : AList T) : Result ((Option T) × (AList T)) :=
   HashMap.remove_from_list_loop key ls
 
 /- [hashmap::{hashmap::HashMap<T>}::remove]:
    Source: 'tests/src/hashmap.rs', lines 303:4-315:5 -/
 def HashMap.remove
-  {T : Type} (self : HashMap T) (key : Usize) :
-  Result ((Option T) × (HashMap T))
-  :=
-  do
+  (self : HashMap T) (key : Usize) : Result ((Option T) × (HashMap T)) :=
+  do {
   let hash ← hash_key key
   let i := alloc.vec.Vec.len self.slots
   let hash_mod ← hash % i
@@ -416,7 +399,7 @@ def HashMap.remove
   | none => let v := index_mut_back a1
             ok (none, { self with slots := v })
   | some _ =>
-    do
+    do {
     let i1 ← self.num_entries - 1#usize
     let v := index_mut_back a1
     ok (x, { self with num_entries := i1, slots := v })
@@ -425,7 +408,7 @@ def HashMap.remove
    Source: 'tests/src/hashmap.rs', lines 334:0-341:1 -/
 def insert_on_disk
   (key : Usize) (value : U64) (st : State) : Result (State × Unit) :=
-  do
+  do {
   let (st1, hm) ← utils.deserialize st
   let hm1 ← HashMap.insert hm key value
   utils.serialize hm1 st1

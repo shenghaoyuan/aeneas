@@ -10,29 +10,25 @@ Module Issue194RecursiveStructProjector.
 
 (** [issue_194_recursive_struct_projector::AVLNode]
     Source: 'tests/src/issue-194-recursive-struct-projector.rs', lines 2:0-6:1 *)
-Inductive AVLNode_t (T : Type) :=
-| mkAVLNode_t :
-  T ->
-  option (AVLNode_t T) ->
-  option (AVLNode_t T) ->
-  AVLNode_t T
+Inductive AVLNode_t :=
+| mkAVLNode_t : T option (AVLNode_t T) option (AVLNode_t T) AVLNode_t T
 .
 
 Arguments mkAVLNode_t { _ }.
 
-Definition aVLNode_value {T : Type} (x : AVLNode_t T) :=
+Definition aVLNode_value (x : AVLNode_t T) :=
   match x with | mkAVLNode_t x1 _ _ => x1 end
 .
 
 Notation "x2 .(aVLNode_value)" := (aVLNode_value x2) (at level 9).
 
-Definition aVLNode_left {T : Type} (x : AVLNode_t T) :=
+Definition aVLNode_left (x : AVLNode_t T) :=
   match x with | mkAVLNode_t _ x1 _ => x1 end
 .
 
 Notation "x2 .(aVLNode_left)" := (aVLNode_left x2) (at level 9).
 
-Definition aVLNode_right {T : Type} (x : AVLNode_t T) :=
+Definition aVLNode_right (x : AVLNode_t T) :=
   match x with | mkAVLNode_t _ _ x1 => x1 end
 .
 
@@ -40,14 +36,12 @@ Notation "x2 .(aVLNode_right)" := (aVLNode_right x2) (at level 9).
 
 (** [issue_194_recursive_struct_projector::get_val]:
     Source: 'tests/src/issue-194-recursive-struct-projector.rs', lines 10:0-12:1 *)
-Definition get_val {T : Type} (x : AVLNode_t T) : result T :=
-  Ok x.(aVLNode_value)
-.
+Definition get_val (x : AVLNode_t T) : result T :=
+  Ok x.(aVLNode_value).
 
 (** [issue_194_recursive_struct_projector::get_left]:
     Source: 'tests/src/issue-194-recursive-struct-projector.rs', lines 14:0-16:1 *)
-Definition get_left
-  {T : Type} (x : AVLNode_t T) : result (option (AVLNode_t T)) :=
+Definition get_left (x : AVLNode_t T) : result (option (AVLNode_t T)) :=
   Ok x.(aVLNode_left)
 .
 

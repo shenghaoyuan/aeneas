@@ -8,22 +8,22 @@ include Betree.TypesExternal
 
 (** [betree::betree::List]
     Source: 'src/betree.rs', lines 17:0-20:1 *)
-type betree_List_t (t : Type0) =
-| Betree_List_Cons : t -> betree_List_t t -> betree_List_t t
+type betree_List_t =
+| Betree_List_Cons : t betree_List_t t betree_List_t t
 | Betree_List_Nil : betree_List_t t
 
 (** [betree::betree::UpsertFunState]
     Source: 'src/betree.rs', lines 63:0-66:1 *)
 type betree_UpsertFunState_t =
-| Betree_UpsertFunState_Add : u64 -> betree_UpsertFunState_t
-| Betree_UpsertFunState_Sub : u64 -> betree_UpsertFunState_t
+| Betree_UpsertFunState_Add : u64 betree_UpsertFunState_t
+| Betree_UpsertFunState_Sub : u64 betree_UpsertFunState_t
 
 (** [betree::betree::Message]
     Source: 'src/betree.rs', lines 69:0-117:1 *)
 type betree_Message_t =
-| Betree_Message_Insert : u64 -> betree_Message_t
+| Betree_Message_Insert : u64 betree_Message_t
 | Betree_Message_Delete : betree_Message_t
-| Betree_Message_Upsert : betree_UpsertFunState_t -> betree_Message_t
+| Betree_Message_Upsert : betree_UpsertFunState_t betree_Message_t
 
 (** [betree::betree::Leaf]
     Source: 'src/betree.rs', lines 167:0-171:1 *)
@@ -39,8 +39,8 @@ type betree_Internal_t =
 (** [betree::betree::Node]
     Source: 'src/betree.rs', lines 179:0-184:1 *)
 and betree_Node_t =
-| Betree_Node_Internal : betree_Internal_t -> betree_Node_t
-| Betree_Node_Leaf : betree_Leaf_t -> betree_Node_t
+| Betree_Node_Internal : betree_Internal_t betree_Node_t
+| Betree_Node_Leaf : betree_Leaf_t betree_Node_t
 
 (** [betree::betree::Params]
     Source: 'src/betree.rs', lines 187:0-199:1 *)

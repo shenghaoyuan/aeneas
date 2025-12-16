@@ -11,8 +11,8 @@ namespace hashmap
 
 /- [hashmap::AList]
    Source: 'tests/src/hashmap.rs', lines 28:0-31:1 -/
-inductive AList (T : Type) where
-| Cons : Usize → T → AList T → AList T
+inductive AList where
+| Cons : Usize T AList T AList T
 | Nil : AList T
 
 /- [hashmap::Fraction]
@@ -23,7 +23,7 @@ structure Fraction where
 
 /- [hashmap::HashMap]
    Source: 'tests/src/hashmap.rs', lines 50:0-62:1 -/
-structure HashMap (T : Type) where
+structure HashMap where
   num_entries : Usize
   max_load_factor : Fraction
   max_load : Usize

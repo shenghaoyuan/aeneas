@@ -16,7 +16,7 @@ def bar : Result Unit :=
 /- [infinite_loop::foo]: loop 0:
    Source: 'tests/src/infinite-loop.rs', lines 8:8-8:13 -/
 def foo_loop : Result Unit :=
-  do
+  do {
   bar
   foo_loop partial_fixpoint
 

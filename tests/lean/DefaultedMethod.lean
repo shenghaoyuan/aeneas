@@ -10,14 +10,14 @@ namespace defaulted_method
 
 /- Trait declaration: [defaulted_method::Trait]
    Source: 'tests/src/defaulted_method.rs', lines 2:0-7:1 -/
-structure Trait (Self : Type) where
+structure Trait where
   provided_method : Self → Result U32
   required_method : Self → Result U32
 
 /- [defaulted_method::Trait::provided_method]:
    Source: 'tests/src/defaulted_method.rs', lines 3:4-5:5 -/
 def Trait.provided_method.default
-  {Self : Type} (TraitInst : Trait Self) (self : Self) : Result U32 :=
+  (TraitInst : Trait Self) (self : Self) : Result U32 :=
   TraitInst.required_method self
 
 /- [defaulted_method::NoOverride]
@@ -71,7 +71,7 @@ def Traitdefaulted_methodYesOverride : Trait YesOverride := {
 /- [defaulted_method::main]:
    Source: 'tests/src/defaulted_method.rs', lines 26:0-33:1 -/
 def main : Result Unit :=
-  do
+  do {
   let _ ← Traitdefaulted_methodNoOverride.provided_method ()
   let _ ← Traitdefaulted_methodYesOverride.provided_method ()
   let n ← (↑(core.cmp.impls.OrdI32.min 10#i32 1#i32) : Result I32)

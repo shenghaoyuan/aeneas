@@ -1,0 +1,7 @@
+imports
+"Aeneas.Primitives"
+(* Add any other theories your Aeneas primitives depend on, e.g.: *)
+"HOL-Library.Word"
+"HOL-Library.Code_Char"
+
+theories

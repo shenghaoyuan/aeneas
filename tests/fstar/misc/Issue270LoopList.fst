@@ -7,9 +7,7 @@ open Primitives
 
 (** [issue_270_loop_list::List]
     Source: 'tests/src/issue-270-loop-list.rs', lines 2:0-5:1 *)
-type list_t (t : Type0) =
-| List_Cons : t -> list_t t -> list_t t
-| List_Nil : list_t t
+type list_t = | List_Cons : t list_t t list_t t | List_Nil : list_t t
 
 (** [issue_270_loop_list::foo]: loop 0:
     Source: 'tests/src/issue-270-loop-list.rs', lines 10:8-12:9 *)

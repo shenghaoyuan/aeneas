@@ -40,7 +40,7 @@ def mk_pair0 (x : U32) (y : U32) : Result (U32 × U32) :=
 
 /- [constants::Pair]
    Source: 'tests/src/constants.rs', lines 38:0-41:1 -/
-structure Pair (T1 : Type) (T2 : Type) where
+structure Pair where
   x : T1
   y : T2
 
@@ -72,12 +72,12 @@ def P3_body : Result (Pair U32 U32) := ok { x := 0#u32, y := 1#u32 }
 
 /- [constants::Wrap]
    Source: 'tests/src/constants.rs', lines 51:0-53:1 -/
-structure Wrap (T : Type) where
+structure Wrap where
   value : T
 
 /- [constants::{constants::Wrap<T>}::new]:
    Source: 'tests/src/constants.rs', lines 56:4-58:5 -/
-def Wrap.new {T : Type} (value : T) : Result (Wrap T) :=
+def Wrap.new (value : T) : Result (Wrap T) :=
   ok { value }
 
 /- [constants::Y]
@@ -128,7 +128,7 @@ def add (a : I32) (b : I32) : Result I32 :=
 /- [constants::get_z2]:
    Source: 'tests/src/constants.rs', lines 72:0-74:1 -/
 def get_z2 : Result I32 :=
-  do
+  do {
   let i ← get_z1
   let i1 ← add i Q3
   add Q1 i1
@@ -155,18 +155,17 @@ def get_z2 : Result I32 :=
 
 /- [constants::V]
    Source: 'tests/src/constants.rs', lines 88:0-90:1 -/
-structure V (T : Type) (N : Usize) where
+structure V where
   x : Array T N
 
 /- [constants::{constants::V<T, N>}::LEN]
    Source: 'tests/src/constants.rs', lines 93:4-93:29 -/
-@[global_simps] def V.LEN_body (T : Type) (N : Usize) : Result Usize := ok N
-@[global_simps, irreducible]
-def V.LEN (T : Type) (N : Usize) : Usize := eval_global (V.LEN_body T N)
+@[global_simps] def V.LEN_body : Result Usize := ok N
+@[global_simps, irreducible] def V.LEN : Usize := eval_global (V.LEN_body T N)
 
 /- [constants::use_v]:
    Source: 'tests/src/constants.rs', lines 96:0-98:1 -/
-def use_v (T : Type) (N : Usize) : Result Usize :=
+def use_v : Result Usize :=
   ok (V.LEN T N)
 
 end constants

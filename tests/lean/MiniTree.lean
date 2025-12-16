@@ -11,7 +11,7 @@ namespace mini_tree
 /- [mini_tree::Node]
    Source: 'tests/src/mini_tree.rs', lines 3:0-5:1 -/
 inductive Node where
-| mk : Option Node → Node
+| mk : Option Node Node
 
 def Node.child (x : Node) := match x with | Node.mk x1 => x1
 

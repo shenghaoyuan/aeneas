@@ -19,15 +19,14 @@ Definition incr (x : u32) : result u32 :=
 
 (** [arrays::array_to_shared_slice_]:
     Source: 'tests/src/arrays.rs', lines 20:0-22:1 *)
-Definition array_to_shared_slice_
-  {T : Type} (s : array T 32%usize) : result (slice T) :=
+Definition array_to_shared_slice_ (s : array T 32%usize) : result (slice T) :=
   Ok (array_to_slice s)
 .
 
 (** [arrays::array_to_mut_slice_]:
     Source: 'tests/src/arrays.rs', lines 25:0-27:1 *)
 Definition array_to_mut_slice_
-  {T : Type} (s : array T 32%usize) :
+  (s : array T 32%usize) :
   result ((slice T) * (slice T -> array T 32%usize))
   :=
   Ok (array_to_slice_mut s)
@@ -35,26 +34,24 @@ Definition array_to_mut_slice_
 
 (** [arrays::array_len]:
     Source: 'tests/src/arrays.rs', lines 29:0-31:1 *)
-Definition array_len {T : Type} (s : array T 32%usize) : result usize :=
+Definition array_len (s : array T 32%usize) : result usize :=
   let s1 := array_to_slice s in Ok (slice_len s1)
 .
 
 (** [arrays::shared_array_len]:
     Source: 'tests/src/arrays.rs', lines 33:0-35:1 *)
-Definition shared_array_len {T : Type} (s : array T 32%usize) : result usize :=
+Definition shared_array_len (s : array T 32%usize) : result usize :=
   let s1 := array_to_slice s in Ok (slice_len s1)
 .
 
 (** [arrays::shared_slice_len]:
     Source: 'tests/src/arrays.rs', lines 37:0-39:1 *)
-Definition shared_slice_len {T : Type} (s : slice T) : result usize :=
-  Ok (slice_len s)
-.
+Definition shared_slice_len (s : slice T) : result usize :=
+  Ok (slice_len s).
 
 (** [arrays::index_array_shared]:
     Source: 'tests/src/arrays.rs', lines 41:0-43:1 *)
-Definition index_array_shared
-  {T : Type} (s : array T 32%usize) (i : usize) : result T :=
+Definition index_array_shared (s : array T 32%usize) (i : usize) : result T :=
   array_index_usize s i
 .
 
@@ -73,22 +70,20 @@ Definition index_array_copy (x : array u32 32%usize) : result u32 :=
 (** [arrays::index_mut_array]:
     Source: 'tests/src/arrays.rs', lines 56:0-58:1 *)
 Definition index_mut_array
-  {T : Type} (s : array T 32%usize) (i : usize) :
-  result (T * (T -> array T 32%usize))
-  :=
+  (s : array T 32%usize) (i : usize) : result (T * (T -> array T 32%usize)) :=
   array_index_mut_usize s i
 .
 
 (** [arrays::index_slice]:
     Source: 'tests/src/arrays.rs', lines 60:0-62:1 *)
-Definition index_slice {T : Type} (s : slice T) (i : usize) : result T :=
+Definition index_slice (s : slice T) (i : usize) : result T :=
   slice_index_usize s i
 .
 
 (** [arrays::index_mut_slice]:
     Source: 'tests/src/arrays.rs', lines 64:0-66:1 *)
 Definition index_mut_slice
-  {T : Type} (s : slice T) (i : usize) : result (T * (T -> slice T)) :=
+  (s : slice T) (i : usize) : result (T * (T -> slice T)) :=
   slice_index_mut_usize s i
 .
 
@@ -150,13 +145,13 @@ Definition array_subslice_mut_
 
 (** [arrays::index_slice_0]:
     Source: 'tests/src/arrays.rs', lines 92:0-94:1 *)
-Definition index_slice_0 {T : Type} (s : slice T) : result T :=
+Definition index_slice_0 (s : slice T) : result T :=
   slice_index_usize s 0%usize
 .
 
 (** [arrays::index_array_0]:
     Source: 'tests/src/arrays.rs', lines 96:0-98:1 *)
-Definition index_array_0 {T : Type} (s : array T 32%usize) : result T :=
+Definition index_array_0 (s : array T 32%usize) : result T :=
   array_index_usize s 0%usize
 .
 

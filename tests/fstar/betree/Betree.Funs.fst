@@ -78,7 +78,7 @@ let betree_upsert_update
 (** [betree::betree::{betree::betree::List<T>}::len]: loop 0:
     Source: 'src/betree.rs', lines 279:8-282:9 *)
 let rec betree_List_len_loop
-  (#t : Type0) (self : betree_List_t t) (len : u64) :
+  (self : betree_List_t t) (len : u64) :
   Tot (result u64) (decreases (betree_List_len_loop_decreases self len))
   =
   begin match self with
@@ -89,13 +89,13 @@ let rec betree_List_len_loop
 
 (** [betree::betree::{betree::betree::List<T>}::len]:
     Source: 'src/betree.rs', lines 276:4-284:5 *)
-let betree_List_len (#t : Type0) (self : betree_List_t t) : result u64 =
+let betree_List_len (self : betree_List_t t) : result u64 =
   betree_List_len_loop self 0
 
 (** [betree::betree::{betree::betree::List<T>}::reverse]: loop 0:
     Source: 'src/betree.rs', lines 306:8-310:9 *)
 let rec betree_List_reverse_loop
-  (#t : Type0) (self : betree_List_t t) (out : betree_List_t t) :
+  (self : betree_List_t t) (out : betree_List_t t) :
   Tot (result (betree_List_t t))
   (decreases (betree_List_reverse_loop_decreases self out))
   =
@@ -107,14 +107,13 @@ let rec betree_List_reverse_loop
 
 (** [betree::betree::{betree::betree::List<T>}::reverse]:
     Source: 'src/betree.rs', lines 304:4-312:5 *)
-let betree_List_reverse
-  (#t : Type0) (self : betree_List_t t) : result (betree_List_t t) =
+let betree_List_reverse (self : betree_List_t t) : result (betree_List_t t) =
   betree_List_reverse_loop self Betree_List_Nil
 
 (** [betree::betree::{betree::betree::List<T>}::split_at]: loop 0:
     Source: 'src/betree.rs', lines 290:8-300:9 *)
 let rec betree_List_split_at_loop
-  (#t : Type0) (n : u64) (beg : betree_List_t t) (end1 : betree_List_t t) :
+  (n : u64) (beg : betree_List_t t) (end1 : betree_List_t t) :
   Tot (result ((betree_List_t t) & (betree_List_t t)))
   (decreases (betree_List_split_at_loop_decreases n beg end1))
   =
@@ -131,7 +130,7 @@ let rec betree_List_split_at_loop
 (** [betree::betree::{betree::betree::List<T>}::split_at]:
     Source: 'src/betree.rs', lines 287:4-302:5 *)
 let betree_List_split_at
-  (#t : Type0) (self : betree_List_t t) (n : u64) :
+  (self : betree_List_t t) (n : u64) :
   result ((betree_List_t t) & (betree_List_t t))
   =
   betree_List_split_at_loop n Betree_List_Nil self
@@ -139,14 +138,14 @@ let betree_List_split_at
 (** [betree::betree::{betree::betree::List<T>}::push_front]:
     Source: 'src/betree.rs', lines 315:4-319:5 *)
 let betree_List_push_front
-  (#t : Type0) (self : betree_List_t t) (x : t) : result (betree_List_t t) =
+  (self : betree_List_t t) (x : t) : result (betree_List_t t) =
   let (tl, _) = core_mem_replace self Betree_List_Nil in
   Ok (Betree_List_Cons x tl)
 
 (** [betree::betree::{betree::betree::List<T>}::pop_front]:
     Source: 'src/betree.rs', lines 322:4-332:5 *)
 let betree_List_pop_front
-  (#t : Type0) (self : betree_List_t t) : result (t & (betree_List_t t)) =
+  (self : betree_List_t t) : result (t & (betree_List_t t)) =
   let (ls, _) = core_mem_replace self Betree_List_Nil in
   begin match ls with
   | Betree_List_Cons x tl -> Ok (x, tl)
@@ -155,7 +154,7 @@ let betree_List_pop_front
 
 (** [betree::betree::{betree::betree::List<T>}::hd]:
     Source: 'src/betree.rs', lines 334:4-339:5 *)
-let betree_List_hd (#t : Type0) (self : betree_List_t t) : result t =
+let betree_List_hd (self : betree_List_t t) : result t =
   begin match self with
   | Betree_List_Cons hd _ -> Ok hd
   | Betree_List_Nil -> Fail Failure
@@ -164,7 +163,7 @@ let betree_List_hd (#t : Type0) (self : betree_List_t t) : result t =
 (** [betree::betree::{betree::betree::List<(u64, T)>}::head_has_key]:
     Source: 'src/betree.rs', lines 343:4-348:5 *)
 let betree_ListPairU64T_head_has_key
-  (#t : Type0) (self : betree_List_t (u64 & t)) (key : u64) : result bool =
+  (self : betree_List_t (u64 & t)) (key : u64) : result bool =
   begin match self with
   | Betree_List_Cons hd _ -> let (i, _) = hd in Ok (i = key)
   | Betree_List_Nil -> Ok false
@@ -173,7 +172,7 @@ let betree_ListPairU64T_head_has_key
 (** [betree::betree::{betree::betree::List<(u64, T)>}::partition_at_pivot]: loop 0:
     Source: 'src/betree.rs', lines 359:8-368:9 *)
 let rec betree_ListPairU64T_partition_at_pivot_loop
-  (#t : Type0) (pivot : u64) (beg : betree_List_t (u64 & t))
+  (pivot : u64) (beg : betree_List_t (u64 & t))
   (end1 : betree_List_t (u64 & t)) (curr : betree_List_t (u64 & t)) :
   Tot (result ((betree_List_t (u64 & t)) & (betree_List_t (u64 & t))))
   (decreases (
@@ -198,7 +197,7 @@ let rec betree_ListPairU64T_partition_at_pivot_loop
 (** [betree::betree::{betree::betree::List<(u64, T)>}::partition_at_pivot]:
     Source: 'src/betree.rs', lines 355:4-370:5 *)
 let betree_ListPairU64T_partition_at_pivot
-  (#t : Type0) (self : betree_List_t (u64 & t)) (pivot : u64) :
+  (self : betree_List_t (u64 & t)) (pivot : u64) :
   result ((betree_List_t (u64 & t)) & (betree_List_t (u64 & t)))
   =
   betree_ListPairU64T_partition_at_pivot_loop pivot Betree_List_Nil

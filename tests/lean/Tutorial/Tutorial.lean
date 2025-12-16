@@ -10,8 +10,7 @@ namespace tutorial
 
 /- [tutorial::choose]:
    Source: 'src/lib.rs', lines 1:0-7:1 -/
-def choose
-  {T : Type} (b : Bool) (x : T) (y : T) : Result (T × (T → (T × T))) :=
+def choose (b : Bool) (x : T) (y : T) : Result (T × (T → (T × T))) :=
   if b
   then let back := fun ret => (ret, y)
        ok (x, back)
@@ -21,14 +20,14 @@ def choose
 /- [tutorial::mul2_add1]:
    Source: 'src/lib.rs', lines 9:0-11:1 -/
 def mul2_add1 (x : U32) : Result U32 :=
-  do
+  do {
   let i ← x + x
   i + 1#u32
 
 /- [tutorial::mul2_add1_add]:
    Source: 'src/lib.rs', lines 13:0-15:1 -/
 def mul2_add1_add (x : U32) (y : U32) : Result U32 :=
-  do
+  do {
   let i ← mul2_add1 x
   i + y
 
@@ -40,7 +39,7 @@ def incr (x : U32) : Result U32 :=
 /- [tutorial::use_incr]:
    Source: 'src/lib.rs', lines 21:0-26:1 -/
 def use_incr : Result Unit :=
-  do
+  do {
   let x ← incr 0#u32
   let x1 ← incr x
   let _ ← incr x1
@@ -48,18 +47,18 @@ def use_incr : Result Unit :=
 
 /- [tutorial::CList]
    Source: 'src/lib.rs', lines 30:0-33:1 -/
-inductive CList (T : Type) where
-| CCons : T → CList T → CList T
+inductive CList where
+| CCons : T CList T CList T
 | CNil : CList T
 
 /- [tutorial::list_nth]:
    Source: 'src/lib.rs', lines 35:0-48:1 -/
-def list_nth {T : Type} (l : CList T) (i : U32) : Result T :=
+def list_nth (l : CList T) (i : U32) : Result T :=
   match l with
   | CList.CCons x tl =>
     if i = 0#u32
     then ok x
-    else do
+    else do {
          let i1 ← i - 1#u32
          list_nth tl i1
   | CList.CNil => fail panic
@@ -67,15 +66,14 @@ partial_fixpoint
 
 /- [tutorial::list_nth_mut]:
    Source: 'src/lib.rs', lines 50:0-63:1 -/
-def list_nth_mut
-  {T : Type} (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
+def list_nth_mut (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
   match l with
   | CList.CCons x tl =>
     if i = 0#u32
     then let back := fun ret => CList.CCons ret tl
          ok (x, back)
     else
-      do
+      do {
       let i1 ← i - 1#u32
       let (x1, list_nth_mut_back) ← list_nth_mut tl i1
       let back := fun ret => let tl1 := list_nth_mut_back ret
@@ -86,12 +84,12 @@ partial_fixpoint
 
 /- [tutorial::list_nth1]: loop 0:
    Source: 'src/lib.rs', lines 66:4-74:1 -/
-def list_nth1_loop {T : Type} (l : CList T) (i : U32) : Result T :=
+def list_nth1_loop (l : CList T) (i : U32) : Result T :=
   match l with
   | CList.CCons x tl =>
     if i = 0#u32
     then ok x
-    else do
+    else do {
          let i1 ← i - 1#u32
          list_nth1_loop tl i1
   | CList.CNil => fail panic
@@ -100,7 +98,7 @@ partial_fixpoint
 /- [tutorial::list_nth1]:
    Source: 'src/lib.rs', lines 65:0-74:1 -/
 @[reducible]
-def list_nth1 {T : Type} (l : CList T) (i : U32) : Result T :=
+def list_nth1 (l : CList T) (i : U32) : Result T :=
   list_nth1_loop l i
 
 /- [tutorial::i32_id]:
@@ -108,7 +106,7 @@ def list_nth1 {T : Type} (l : CList T) (i : U32) : Result T :=
 def i32_id (i : I32) : Result I32 :=
   if i = 0#i32
   then ok 0#i32
-  else do
+  else do {
        let i1 ← i - 1#i32
        let i2 ← i32_id i1
        i2 + 1#i32
@@ -119,7 +117,7 @@ partial_fixpoint
 mutual def even (i : U32) : Result Bool :=
   if i = 0#u32
   then ok true
-  else do
+  else do {
        let i1 ← i - 1#u32
        odd i1
 partial_fixpoint
@@ -129,7 +127,7 @@ partial_fixpoint
 def odd (i : U32) : Result Bool :=
   if i = 0#u32
   then ok false
-  else do
+  else do {
        let i1 ← i - 1#u32
        even i1
 partial_fixpoint
@@ -138,13 +136,13 @@ end
 
 /- Trait declaration: [tutorial::Counter]
    Source: 'src/lib.rs', lines 105:0-107:1 -/
-structure Counter (Self : Type) where
+structure Counter where
   incr : Self → Result (Usize × Self)
 
 /- [tutorial::{tutorial::Counter for usize}::incr]:
    Source: 'src/lib.rs', lines 110:4-114:5 -/
 def CounterUsize.incr (self : Usize) : Result (Usize × Usize) :=
-  do
+  do {
   let self1 ← self + 1#usize
   ok (self, self1)
 
@@ -157,21 +155,20 @@ def CounterUsize : Counter Usize := {
 
 /- [tutorial::use_counter]:
    Source: 'src/lib.rs', lines 117:0-119:1 -/
-def use_counter
-  {T : Type} (CounterInst : Counter T) (cnt : T) : Result (Usize × T) :=
+def use_counter (CounterInst : Counter T) (cnt : T) : Result (Usize × T) :=
   CounterInst.incr cnt
 
 /- [tutorial::list_nth_mut1]: loop 0:
    Source: 'src/lib.rs', lines 124:4-132:1 -/
 def list_nth_mut1_loop
-  {T : Type} (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
+  (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
   match l with
   | CList.CCons x tl =>
     if i = 0#u32
     then let back := fun ret => CList.CCons ret tl
          ok (x, back)
     else
-      do
+      do {
       let i1 ← i - 1#u32
       let (t, back) ← list_nth_mut1_loop tl i1
       let back1 := fun ret => let tl1 := back ret
@@ -183,17 +180,16 @@ partial_fixpoint
 /- [tutorial::list_nth_mut1]:
    Source: 'src/lib.rs', lines 123:0-132:1 -/
 @[reducible]
-def list_nth_mut1
-  {T : Type} (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
+def list_nth_mut1 (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
   list_nth_mut1_loop l i
 
 /- [tutorial::list_tail]: loop 0:
    Source: 'src/lib.rs', lines 135:4-137:5 -/
 def list_tail_loop
-  {T : Type} (l : CList T) : Result ((CList T) × (CList T → CList T)) :=
+  (l : CList T) : Result ((CList T) × (CList T → CList T)) :=
   match l with
   | CList.CCons t tl =>
-    do
+    do {
     let (c, back) ← list_tail_loop tl
     let back1 := fun ret => let tl1 := back ret
                             CList.CCons t tl1
@@ -204,21 +200,19 @@ partial_fixpoint
 /- [tutorial::list_tail]:
    Source: 'src/lib.rs', lines 134:0-139:1 -/
 @[reducible]
-def list_tail
-  {T : Type} (l : CList T) : Result ((CList T) × (CList T → CList T)) :=
+def list_tail (l : CList T) : Result ((CList T) × (CList T → CList T)) :=
   list_tail_loop l
 
 /- [tutorial::append_in_place]:
    Source: 'src/lib.rs', lines 141:0-144:1 -/
-def append_in_place
-  {T : Type} (l0 : CList T) (l1 : CList T) : Result (CList T) :=
-  do
+def append_in_place (l0 : CList T) (l1 : CList T) : Result (CList T) :=
+  do {
   let (_, list_tail_back) ← list_tail l0
   ok (list_tail_back l1)
 
 /- [tutorial::reverse]: loop 0:
    Source: 'src/lib.rs', lines 148:4-152:5 -/
-def reverse_loop {T : Type} (l : CList T) (out : CList T) : Result (CList T) :=
+def reverse_loop (l : CList T) (out : CList T) : Result (CList T) :=
   match l with
   | CList.CCons hd tl => reverse_loop tl (CList.CCons hd out)
   | CList.CNil => ok out
@@ -227,7 +221,7 @@ partial_fixpoint
 /- [tutorial::reverse]:
    Source: 'src/lib.rs', lines 146:0-154:1 -/
 @[reducible]
-def reverse {T : Type} (l : CList T) : Result (CList T) :=
+def reverse (l : CList T) : Result (CList T) :=
   reverse_loop l CList.CNil
 
 /- [tutorial::zero]: loop 0:
@@ -237,7 +231,7 @@ def zero_loop
   let i1 := alloc.vec.Vec.len x
   if i < i1
   then
-    do
+    do {
     let (_, index_mut_back) ←
       alloc.vec.Vec.index_mut (core.slice.index.SliceIndexUsizeSliceInst U32) x
         i
@@ -262,7 +256,7 @@ def add_no_overflow_loop
   let i1 := alloc.vec.Vec.len x
   if i < i1
   then
-    do
+    do {
     let i2 ←
       alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSliceInst U32) y i
     let (i3, index_mut_back) ←
@@ -293,7 +287,7 @@ def add_with_carry_loop
   let i1 := alloc.vec.Vec.len x
   if i < i1
   then
-    do
+    do {
     let i2 ←
       alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSliceInst U32) x i
     let i3 ← (↑(UScalar.cast .U32 c0) : Result U32)
@@ -348,7 +342,7 @@ def add_loop
   :=
   if i < max1
   then
-    do
+    do {
     let yi ← get_or_zero y i
     let i1 ←
       alloc.vec.Vec.index (core.slice.index.SliceIndexUsizeSliceInst U32) x i
@@ -369,7 +363,7 @@ def add_loop
   else
     if c0 != 0#u8
     then
-      do
+      do {
       let i1 ← (↑(UScalar.cast .U32 c0) : Result U32)
       alloc.vec.Vec.push x i1
     else ok x
@@ -381,7 +375,7 @@ def add
   (x : alloc.vec.Vec U32) (y : alloc.vec.Vec U32) :
   Result (alloc.vec.Vec U32)
   :=
-  do
+  do {
   let i := alloc.vec.Vec.len x
   let i1 := alloc.vec.Vec.len y
   let max1 ← max i i1

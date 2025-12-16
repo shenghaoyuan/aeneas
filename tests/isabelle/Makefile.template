@@ -1,0 +1,17 @@
+# This file was automatically generated - modify ../Makefile.template instead
+# This is the Makefile that runs inside each test subdirectory.
+
+.PHONY: all
+all: build-isabelle
+
+# Target to build the Isabelle session defined by the ROOT file
+# We disable document generation for speed.
+.PHONY: build-isabelle
+build-isabelle:
+	isabelle build -v -d . -o browser_info -o document=none
+
+.PHONY: clean
+clean:
+	isabelle clean -d .
+	rm -rf .isabelle-emacs-load.lisp
+	rm -rf browser_info

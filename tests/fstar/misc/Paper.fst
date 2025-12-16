@@ -20,8 +20,7 @@ let _ = assert_norm (test_incr = Ok ())
 
 (** [paper::choose]:
     Source: 'tests/src/paper.rs', lines 17:0-23:1 *)
-let choose
-  (#t : Type0) (b : bool) (x : t) (y : t) : result (t & (t -> (t & t))) =
+let choose (b : bool) (x : t) (y : t) : result (t & (t -> (t & t))) =
   if b
   then let back = fun ret -> (ret, y) in Ok (x, back)
   else let back = fun ret -> (x, ret) in Ok (y, back)
@@ -42,14 +41,11 @@ let _ = assert_norm (test_choose = Ok ())
 
 (** [paper::List]
     Source: 'tests/src/paper.rs', lines 37:0-40:1 *)
-type list_t (t : Type0) =
-| List_Cons : t -> list_t t -> list_t t
-| List_Nil : list_t t
+type list_t = | List_Cons : t list_t t list_t t | List_Nil : list_t t
 
 (** [paper::list_nth_mut]:
     Source: 'tests/src/paper.rs', lines 44:0-57:1 *)
-let rec list_nth_mut
-  (#t : Type0) (l : list_t t) (i : u32) : result (t & (t -> list_t t)) =
+let rec list_nth_mut (l : list_t t) (i : u32) : result (t & (t -> list_t t)) =
   begin match l with
   | List_Cons x tl ->
     if i = 0

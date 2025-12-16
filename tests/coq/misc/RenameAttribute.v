@@ -10,7 +10,7 @@ Module RenameAttribute.
 
 (** Trait declaration: [rename_attribute::BoolTrait]
     Source: 'tests/src/rename_attribute.rs', lines 9:0-19:1 *)
-Record BoolTest_t (Self : Type) := mkBoolTest_t {
+Record BoolTest_t := mkBoolTest_t {
   BoolTest_t_getTest : Self -> result bool;
   BoolTest_t_retTest : Self -> result bool;
 }.
@@ -21,10 +21,8 @@ Arguments BoolTest_t_retTest { _ } _.
 
 (** [rename_attribute::BoolTrait::ret_true]:
     Source: 'tests/src/rename_attribute.rs', lines 16:4-18:5 *)
-Definition boolTrait_retTest_default
-  {Self : Type} (self : Self) : result bool :=
-  Ok true
-.
+Definition boolTrait_retTest_default (self : Self) : result bool :=
+  Ok true.
 
 (** [rename_attribute::{rename_attribute::BoolTrait for bool}::get_bool]:
     Source: 'tests/src/rename_attribute.rs', lines 23:4-25:5 *)
@@ -45,7 +43,7 @@ Definition BoolImpl : BoolTest_t bool := {|
 
 (** [rename_attribute::test_bool_trait]:
     Source: 'tests/src/rename_attribute.rs', lines 29:0-31:1 *)
-Definition boolFn (T : Type) (x : bool) : result bool :=
+Definition boolFn (x : bool) : result bool :=
   b <- boolTraitBool_getTest x; if b then boolTraitBool_retTest x else Ok false
 .
 

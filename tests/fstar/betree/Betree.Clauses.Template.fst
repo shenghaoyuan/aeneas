@@ -9,30 +9,29 @@ open Betree.Types
 (** [betree::betree::{betree::betree::List<T>}::len]: decreases clause
     Source: 'src/betree.rs', lines 279:8-282:9 *)
 unfold
-let betree_List_len_loop_decreases (#t : Type0) (self : betree_List_t t)
-  (len : u64) : nat =
+let betree_List_len_loop_decreases (self : betree_List_t t) (len : u64) : nat =
   admit ()
 
 (** [betree::betree::{betree::betree::List<T>}::reverse]: decreases clause
     Source: 'src/betree.rs', lines 306:8-310:9 *)
 unfold
-let betree_List_reverse_loop_decreases (#t : Type0) (self : betree_List_t t)
+let betree_List_reverse_loop_decreases (self : betree_List_t t)
   (out : betree_List_t t) : nat =
   admit ()
 
 (** [betree::betree::{betree::betree::List<T>}::split_at]: decreases clause
     Source: 'src/betree.rs', lines 290:8-300:9 *)
 unfold
-let betree_List_split_at_loop_decreases (#t : Type0) (n : u64)
-  (beg : betree_List_t t) (end1 : betree_List_t t) : nat =
+let betree_List_split_at_loop_decreases (n : u64) (beg : betree_List_t t)
+  (end1 : betree_List_t t) : nat =
   admit ()
 
 (** [betree::betree::{betree::betree::List<(u64, T)>}::partition_at_pivot]: decreases clause
     Source: 'src/betree.rs', lines 359:8-368:9 *)
 unfold
-let betree_ListPairU64T_partition_at_pivot_loop_decreases (#t : Type0)
-  (pivot : u64) (beg : betree_List_t (u64 & t))
-  (end1 : betree_List_t (u64 & t)) (curr : betree_List_t (u64 & t)) : nat =
+let betree_ListPairU64T_partition_at_pivot_loop_decreases (pivot : u64)
+  (beg : betree_List_t (u64 & t)) (end1 : betree_List_t (u64 & t))
+  (curr : betree_List_t (u64 & t)) : nat =
   admit ()
 
 (** [betree::betree::{betree::betree::Node}::lookup_in_bindings]: decreases clause

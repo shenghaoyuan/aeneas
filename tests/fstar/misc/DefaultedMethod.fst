@@ -8,16 +8,12 @@ open Primitives
 (** Trait declaration: [core::cmp::PartialEq]
     Source: '/rustc/library/core/src/cmp.rs', lines 252:0-252:59
     Name pattern: [core::cmp::PartialEq] *)
-noeq type core_cmp_PartialEq_t (self : Type0) (rhs : Type0) = {
-  eq : self -> rhs -> result bool;
-}
+noeq type core_cmp_PartialEq_t = { eq : self -> rhs -> result bool; }
 
 (** Trait declaration: [core::cmp::Eq]
     Source: '/rustc/library/core/src/cmp.rs', lines 338:0-338:44
     Name pattern: [core::cmp::Eq] *)
-noeq type core_cmp_Eq_t (self : Type0) = {
-  partialEqInst : core_cmp_PartialEq_t self self;
-}
+noeq type core_cmp_Eq_t = { partialEqInst : core_cmp_PartialEq_t self self; }
 
 (** [core::cmp::Ordering]
     Source: '/rustc/library/core/src/cmp.rs', lines 392:0-392:17
@@ -30,7 +26,7 @@ type core_cmp_Ordering_t =
 (** Trait declaration: [core::cmp::PartialOrd]
     Source: '/rustc/library/core/src/cmp.rs', lines 1345:0-1345:77
     Name pattern: [core::cmp::PartialOrd] *)
-noeq type core_cmp_PartialOrd_t (self : Type0) (rhs : Type0) = {
+noeq type core_cmp_PartialOrd_t = {
   partialEqInst : core_cmp_PartialEq_t self rhs;
   partial_cmp : self -> rhs -> result (option core_cmp_Ordering_t);
 }
@@ -38,7 +34,7 @@ noeq type core_cmp_PartialOrd_t (self : Type0) (rhs : Type0) = {
 (** Trait declaration: [core::cmp::Ord]
     Source: '/rustc/library/core/src/cmp.rs', lines 961:0-961:51
     Name pattern: [core::cmp::Ord] *)
-noeq type core_cmp_Ord_t (self : Type0) = {
+noeq type core_cmp_Ord_t = {
   eqInst : core_cmp_Eq_t self;
   partialOrdInst : core_cmp_PartialOrd_t self self;
   cmp : self -> self -> result core_cmp_Ordering_t;
@@ -49,7 +45,7 @@ noeq type core_cmp_Ord_t (self : Type0) = {
     Source: '/rustc/library/core/src/cmp.rs', lines 1052:4-1054:20
     Name pattern: [core::cmp::Ord::min] *)
 assume val core_cmp_Ord_min_default
-  (#self : Type0) (ordInst : core_cmp_Ord_t self) : self -> self -> result self
+  (ordInst : core_cmp_Ord_t self) : self -> self -> result self
 
 (** [core::cmp::impls::{core::cmp::PartialEq<i32> for i32}::eq]:
     Source: '/rustc/library/core/src/cmp.rs', lines 1816:16-1816:50
@@ -74,7 +70,7 @@ assume val core_cmp_impls_OrdI32_min : i32 -> i32 -> result i32
 
 (** Trait declaration: [defaulted_method::Trait]
     Source: 'tests/src/defaulted_method.rs', lines 2:0-7:1 *)
-noeq type trait_t (self : Type0) = {
+noeq type trait_t = {
   provided_method : self -> result u32;
   required_method : self -> result u32;
 }
@@ -82,7 +78,7 @@ noeq type trait_t (self : Type0) = {
 (** [defaulted_method::Trait::provided_method]:
     Source: 'tests/src/defaulted_method.rs', lines 3:4-5:5 *)
 let trait_provided_method_default
-  (#self : Type0) (traitInst : trait_t self) (self1 : self) : result u32 =
+  (traitInst : trait_t self) (self1 : self) : result u32 =
   traitInst.required_method self1
 
 (** [defaulted_method::NoOverride]

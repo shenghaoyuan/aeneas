@@ -12,7 +12,7 @@ namespace issue_440_type_error
    Source: 'tests/src/issue-440-type-error.rs', lines 3:0-6:1 -/
 inductive PeanoNum where
 | Zero : PeanoNum
-| Succ : PeanoNum → PeanoNum
+| Succ : PeanoNum PeanoNum
 
 /- [issue_440_type_error::f]:
    Source: 'tests/src/issue-440-type-error.rs', lines 8:0-15:1 -/

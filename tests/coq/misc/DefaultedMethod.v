@@ -11,8 +11,7 @@ Module DefaultedMethod.
 (** Trait declaration: [core::cmp::PartialEq]
     Source: '/rustc/library/core/src/cmp.rs', lines 252:0-252:59
     Name pattern: [core::cmp::PartialEq] *)
-Record core_cmp_PartialEq_t (Self : Type) (Rhs : Type)
-  := mkcore_cmp_PartialEq_t {
+Record core_cmp_PartialEq_t := mkcore_cmp_PartialEq_t {
   core_cmp_PartialEq_t_eq : Self -> Rhs -> result bool;
 }.
 
@@ -22,7 +21,7 @@ Arguments core_cmp_PartialEq_t_eq { _ } { _ } _.
 (** Trait declaration: [core::cmp::Eq]
     Source: '/rustc/library/core/src/cmp.rs', lines 338:0-338:44
     Name pattern: [core::cmp::Eq] *)
-Record core_cmp_Eq_t (Self : Type) := mkcore_cmp_Eq_t {
+Record core_cmp_Eq_t := mkcore_cmp_Eq_t {
   core_cmp_Eq_tcore_cmp_Eq_t_PartialEqInst : core_cmp_PartialEq_t Self Self;
 }.
 
@@ -41,8 +40,7 @@ Inductive core_cmp_Ordering_t :=
 (** Trait declaration: [core::cmp::PartialOrd]
     Source: '/rustc/library/core/src/cmp.rs', lines 1345:0-1345:77
     Name pattern: [core::cmp::PartialOrd] *)
-Record core_cmp_PartialOrd_t (Self : Type) (Rhs : Type)
-  := mkcore_cmp_PartialOrd_t {
+Record core_cmp_PartialOrd_t := mkcore_cmp_PartialOrd_t {
   core_cmp_PartialOrd_tcore_cmp_PartialOrd_t_PartialEqInst :
     core_cmp_PartialEq_t Self Rhs;
   core_cmp_PartialOrd_t_partial_cmp : Self -> Rhs -> result (option
@@ -57,7 +55,7 @@ Arguments core_cmp_PartialOrd_t_partial_cmp { _ } { _ } _.
 (** Trait declaration: [core::cmp::Ord]
     Source: '/rustc/library/core/src/cmp.rs', lines 961:0-961:51
     Name pattern: [core::cmp::Ord] *)
-Record core_cmp_Ord_t (Self : Type) := mkcore_cmp_Ord_t {
+Record core_cmp_Ord_t := mkcore_cmp_Ord_t {
   core_cmp_Ord_tcore_cmp_Ord_t_EqInst : core_cmp_Eq_t Self;
   core_cmp_Ord_tcore_cmp_Ord_t_PartialOrdInst : core_cmp_PartialOrd_t Self
     Self;
@@ -75,8 +73,7 @@ Arguments core_cmp_Ord_t_min { _ } _.
     Source: '/rustc/library/core/src/cmp.rs', lines 1052:4-1054:20
     Name pattern: [core::cmp::Ord::min] *)
 Axiom core_cmp_Ord_min_default :
-  forall{Self : Type} (ordInst : core_cmp_Ord_t Self),
-        Self -> Self -> result Self
+  forall(ordInst : core_cmp_Ord_t Self), Self -> Self -> result Self
 .
 
 (** [core::cmp::impls::{core::cmp::PartialEq<i32> for i32}::eq]:
@@ -103,7 +100,7 @@ Axiom core_cmp_impls_OrdI32_min : i32 -> i32 -> result i32.
 
 (** Trait declaration: [defaulted_method::Trait]
     Source: 'tests/src/defaulted_method.rs', lines 2:0-7:1 *)
-Record Trait_t (Self : Type) := mkTrait_t {
+Record Trait_t := mkTrait_t {
   Trait_t_provided_method : Self -> result u32;
   Trait_t_required_method : Self -> result u32;
 }.
@@ -115,7 +112,7 @@ Arguments Trait_t_required_method { _ } _.
 (** [defaulted_method::Trait::provided_method]:
     Source: 'tests/src/defaulted_method.rs', lines 3:4-5:5 *)
 Definition trait_provided_method_default
-  {Self : Type} (traitInst : Trait_t Self) (self : Self) : result u32 :=
+  (traitInst : Trait_t Self) (self : Self) : result u32 :=
   traitInst.(Trait_t_required_method) self
 .
 

@@ -7,7 +7,7 @@ open Primitives
 
 (** Trait declaration: [rename_attribute::BoolTrait]
     Source: 'tests/src/rename_attribute.rs', lines 9:0-19:1 *)
-noeq type boolTest_t (self : Type0) = {
+noeq type boolTest_t = {
   getTest : self -> result bool;
   retTest : self -> result bool;
 }

@@ -23,29 +23,28 @@ def slice_subslice_from_mut
 
 /- [slices::split_at]:
    Source: 'tests/src/slices.rs', lines 11:0-13:1 -/
-def split_at
-  {T : Type} (x : Slice T) (n : Usize) : Result ((Slice T) × (Slice T)) :=
+def split_at (x : Slice T) (n : Usize) : Result ((Slice T) × (Slice T)) :=
   core.slice.Slice.split_at x n
 
 /- [slices::split_at_mut]:
    Source: 'tests/src/slices.rs', lines 15:0-17:1 -/
 def split_at_mut
-  {T : Type} (x : Slice T) (n : Usize) :
+  (x : Slice T) (n : Usize) :
   Result (((Slice T) × (Slice T)) × (((Slice T) × (Slice T)) → Slice T))
   :=
-  do
+  do {
   let (p, split_at_mut_back) ← core.slice.Slice.split_at_mut x n
   let back := fun ret => split_at_mut_back ret
   ok (p, back)
 
 /- [slices::swap]:
    Source: 'tests/src/slices.rs', lines 19:0-21:1 -/
-def swap {T : Type} (x : Slice T) (n : Usize) (m : Usize) : Result (Slice T) :=
+def swap (x : Slice T) (n : Usize) (m : Usize) : Result (Slice T) :=
   core.slice.Slice.swap x n m
 
 /- [slices::from_vec]:
    Source: 'tests/src/slices.rs', lines 23:0-25:1 -/
-def from_vec {T : Type} (x : alloc.vec.Vec T) : Result (Slice T) :=
+def from_vec (x : alloc.vec.Vec T) : Result (Slice T) :=
   alloc.vec.FromBoxSliceVec.from x
 
 end slices

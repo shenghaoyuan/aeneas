@@ -37,7 +37,7 @@ let mk_pair0 (x : u32) (y1 : u32) : result (u32 & u32) =
 
 (** [constants::Pair]
     Source: 'tests/src/constants.rs', lines 38:0-41:1 *)
-type pair_t (t1 : Type0) (t2 : Type0) = { x : t1; y : t2; }
+type pair_t = { x : t1; y : t2; }
 
 (** [constants::mk_pair1]:
     Source: 'tests/src/constants.rs', lines 29:0-31:1 *)
@@ -66,11 +66,11 @@ let p3 : pair_t u32 u32 = eval_global p3_body
 
 (** [constants::Wrap]
     Source: 'tests/src/constants.rs', lines 51:0-53:1 *)
-type wrap_t (t : Type0) = { value : t; }
+type wrap_t = { value : t; }
 
 (** [constants::{constants::Wrap<T>}::new]:
     Source: 'tests/src/constants.rs', lines 56:4-58:5 *)
-let wrap_new (#t : Type0) (value : t) : result (wrap_t t) =
+let wrap_new (value : t) : result (wrap_t t) =
   Ok { value }
 
 (** [constants::Y]
@@ -145,15 +145,15 @@ let s4 : pair_t u32 u32 = eval_global s4_body
 
 (** [constants::V]
     Source: 'tests/src/constants.rs', lines 88:0-90:1 *)
-type v_t (t : Type0) (n : usize) = { x : array t n; }
+type v_t = { x : array t n; }
 
 (** [constants::{constants::V<T, N>}::LEN]
     Source: 'tests/src/constants.rs', lines 93:4-93:29 *)
-let v_len_body (t : Type0) (n : usize) : result usize = Ok n
-let v_len (t : Type0) (n : usize) : usize = eval_global (v_len_body t n)
+let v_len_body : result usize = Ok n
+let v_len : usize = eval_global (v_len_body t n)
 
 (** [constants::use_v]:
     Source: 'tests/src/constants.rs', lines 96:0-98:1 *)
-let use_v (t : Type0) (n : usize) : result usize =
+let use_v : result usize =
   Ok (v_len t n)
 

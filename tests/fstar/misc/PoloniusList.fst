@@ -7,9 +7,7 @@ open Primitives
 
 (** [polonius_list::List]
     Source: 'tests/src/polonius_list.rs', lines 6:0-9:1 *)
-type list_t (t : Type0) =
-| List_Cons : t -> list_t t -> list_t t
-| List_Nil : list_t t
+type list_t = | List_Cons : t list_t t list_t t | List_Nil : list_t t
 
 (** [polonius_list::get_list_at_x]:
     Source: 'tests/src/polonius_list.rs', lines 16:0-30:1 *)

@@ -11,14 +11,14 @@ namespace bitwise
 /- [bitwise::shift_u32]:
    Source: 'tests/src/bitwise.rs', lines 5:0-10:1 -/
 def shift_u32 (a : U32) : Result U32 :=
-  do
+  do {
   let t ← a >>> 16#usize
   t <<< 16#usize
 
 /- [bitwise::shift_i32]:
    Source: 'tests/src/bitwise.rs', lines 12:0-17:1 -/
 def shift_i32 (a : I32) : Result I32 :=
-  do
+  do {
   let t ← a >>> 16#isize
   t <<< 16#isize
 

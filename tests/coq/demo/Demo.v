@@ -20,8 +20,7 @@ Axiom core_num_U32_wrapping_sub : u32 -> u32 -> result u32.
 
 (** [demo::choose]:
     Source: 'tests/src/demo.rs', lines 8:0-14:1 *)
-Definition choose
-  {T : Type} (b : bool) (x : T) (y : T) : result (T * (T -> (T * T))) :=
+Definition choose (b : bool) (x : T) (y : T) : result (T * (T -> (T * T))) :=
   if b
   then let back := fun (ret : T) => (ret, y) in Ok (x, back)
   else let back := fun (ret : T) => (x, ret) in Ok (y, back)
@@ -52,8 +51,8 @@ Definition use_incr : result unit :=
 
 (** [demo::CList]
     Source: 'tests/src/demo.rs', lines 37:0-40:1 *)
-Inductive CList_t (T : Type) :=
-| CList_CCons : T -> CList_t T -> CList_t T
+Inductive CList_t :=
+| CList_CCons : T CList_t T CList_t T
 | CList_CNil : CList_t T
 .
 
@@ -62,7 +61,7 @@ Arguments CList_CNil { _ }.
 
 (** [demo::list_nth]:
     Source: 'tests/src/demo.rs', lines 42:0-55:1 *)
-Fixpoint list_nth {T : Type} (n : nat) (l : CList_t T) (i : u32) : result T :=
+Fixpoint list_nth (n : nat) (l : CList_t T) (i : u32) : result T :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -76,8 +75,7 @@ Fixpoint list_nth {T : Type} (n : nat) (l : CList_t T) (i : u32) : result T :=
 
 (** [demo::list_nth1]: loop 0:
     Source: 'tests/src/demo.rs', lines 58:4-66:1 *)
-Fixpoint list_nth1_loop
-  {T : Type} (n : nat) (l : CList_t T) (i : u32) : result T :=
+Fixpoint list_nth1_loop (n : nat) (l : CList_t T) (i : u32) : result T :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -93,17 +91,14 @@ Fixpoint list_nth1_loop
 
 (** [demo::list_nth1]:
     Source: 'tests/src/demo.rs', lines 57:0-66:1 *)
-Definition list_nth1
-  {T : Type} (n : nat) (l : CList_t T) (i : u32) : result T :=
+Definition list_nth1 (n : nat) (l : CList_t T) (i : u32) : result T :=
   list_nth1_loop n l i
 .
 
 (** [demo::list_nth_mut]:
     Source: 'tests/src/demo.rs', lines 68:0-81:1 *)
 Fixpoint list_nth_mut
-  {T : Type} (n : nat) (l : CList_t T) (i : u32) :
-  result (T * (T -> CList_t T))
-  :=
+  (n : nat) (l : CList_t T) (i : u32) : result (T * (T -> CList_t T)) :=
   match n with
   | O => Fail_ OutOfFuel
   | S n1 =>
@@ -140,7 +135,7 @@ Fixpoint i32_id (n : nat) (i : i32) : result i32 :=
 (** [demo::list_tail]:
     Source: 'tests/src/demo.rs', lines 91:0-96:1 *)
 Fixpoint list_tail
-  {T : Type} (n : nat) (l : CList_t T) :
+  (n : nat) (l : CList_t T) :
   result ((CList_t T) * (CList_t T -> CList_t T))
   :=
   match n with
@@ -162,7 +157,7 @@ Fixpoint list_tail
 
 (** Trait declaration: [demo::Counter]
     Source: 'tests/src/demo.rs', lines 100:0-102:1 *)
-Record Counter_t (Self : Type) := mkCounter_t {
+Record Counter_t := mkCounter_t {
   Counter_t_incr : Self -> result (usize * Self);
 }.
 
@@ -184,7 +179,7 @@ Definition CounterUsize : Counter_t usize := {|
 (** [demo::use_counter]:
     Source: 'tests/src/demo.rs', lines 112:0-114:1 *)
 Definition use_counter
-  {T : Type} (counterInst : Counter_t T) (cnt : T) : result (usize * T) :=
+  (counterInst : Counter_t T) (cnt : T) : result (usize * T) :=
   counterInst.(Counter_t_incr) cnt
 .
 

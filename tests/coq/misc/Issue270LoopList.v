@@ -10,10 +10,7 @@ Module Issue270LoopList.
 
 (** [issue_270_loop_list::List]
     Source: 'tests/src/issue-270-loop-list.rs', lines 2:0-5:1 *)
-Inductive List_t (T : Type) :=
-| List_Cons : T -> List_t T -> List_t T
-| List_Nil : List_t T
-.
+Inductive List_t := | List_Cons : T List_t T List_t T | List_Nil : List_t T.
 
 Arguments List_Cons { _ }.
 Arguments List_Nil { _ }.

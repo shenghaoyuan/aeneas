@@ -10,8 +10,7 @@ namespace demo
 
 /- [demo::choose]:
    Source: 'tests/src/demo.rs', lines 8:0-14:1 -/
-def choose
-  {T : Type} (b : Bool) (x : T) (y : T) : Result (T × (T → (T × T))) :=
+def choose (b : Bool) (x : T) (y : T) : Result (T × (T → (T × T))) :=
   if b
   then let back := fun ret => (ret, y)
        ok (x, back)
@@ -21,14 +20,14 @@ def choose
 /- [demo::mul2_add1]:
    Source: 'tests/src/demo.rs', lines 16:0-18:1 -/
 def mul2_add1 (x : U32) : Result U32 :=
-  do
+  do {
   let i ← x + x
   i + 1#u32
 
 /- [demo::use_mul2_add1]:
    Source: 'tests/src/demo.rs', lines 20:0-22:1 -/
 def use_mul2_add1 (x : U32) (y : U32) : Result U32 :=
-  do
+  do {
   let i ← mul2_add1 x
   i + y
 
@@ -40,7 +39,7 @@ def incr (x : U32) : Result U32 :=
 /- [demo::use_incr]:
    Source: 'tests/src/demo.rs', lines 28:0-33:1 -/
 def use_incr : Result Unit :=
-  do
+  do {
   let x ← incr 0#u32
   let x1 ← incr x
   let _ ← incr x1
@@ -48,18 +47,18 @@ def use_incr : Result Unit :=
 
 /- [demo::CList]
    Source: 'tests/src/demo.rs', lines 37:0-40:1 -/
-inductive CList (T : Type) where
-| CCons : T → CList T → CList T
+inductive CList where
+| CCons : T CList T CList T
 | CNil : CList T
 
 /- [demo::list_nth]:
    Source: 'tests/src/demo.rs', lines 42:0-55:1 -/
-def list_nth {T : Type} (l : CList T) (i : U32) : Result T :=
+def list_nth (l : CList T) (i : U32) : Result T :=
   match l with
   | CList.CCons x tl =>
     if i = 0#u32
     then ok x
-    else do
+    else do {
          let i1 ← i - 1#u32
          list_nth tl i1
   | CList.CNil => fail panic
@@ -67,12 +66,12 @@ partial_fixpoint
 
 /- [demo::list_nth1]: loop 0:
    Source: 'tests/src/demo.rs', lines 58:4-66:1 -/
-def list_nth1_loop {T : Type} (l : CList T) (i : U32) : Result T :=
+def list_nth1_loop (l : CList T) (i : U32) : Result T :=
   match l with
   | CList.CCons x tl =>
     if i = 0#u32
     then ok x
-    else do
+    else do {
          let i1 ← i - 1#u32
          list_nth1_loop tl i1
   | CList.CNil => fail panic
@@ -81,20 +80,19 @@ partial_fixpoint
 /- [demo::list_nth1]:
    Source: 'tests/src/demo.rs', lines 57:0-66:1 -/
 @[reducible]
-def list_nth1 {T : Type} (l : CList T) (i : U32) : Result T :=
+def list_nth1 (l : CList T) (i : U32) : Result T :=
   list_nth1_loop l i
 
 /- [demo::list_nth_mut]:
    Source: 'tests/src/demo.rs', lines 68:0-81:1 -/
-def list_nth_mut
-  {T : Type} (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
+def list_nth_mut (l : CList T) (i : U32) : Result (T × (T → CList T)) :=
   match l with
   | CList.CCons x tl =>
     if i = 0#u32
     then let back := fun ret => CList.CCons ret tl
          ok (x, back)
     else
-      do
+      do {
       let i1 ← i - 1#u32
       let (x1, list_nth_mut_back) ← list_nth_mut tl i1
       let back := fun ret => let tl1 := list_nth_mut_back ret
@@ -108,7 +106,7 @@ partial_fixpoint
 def i32_id (i : I32) : Result I32 :=
   if i = 0#i32
   then ok 0#i32
-  else do
+  else do {
        let i1 ← i - 1#i32
        let i2 ← i32_id i1
        i2 + 1#i32
@@ -116,11 +114,10 @@ partial_fixpoint
 
 /- [demo::list_tail]:
    Source: 'tests/src/demo.rs', lines 91:0-96:1 -/
-def list_tail
-  {T : Type} (l : CList T) : Result ((CList T) × (CList T → CList T)) :=
+def list_tail (l : CList T) : Result ((CList T) × (CList T → CList T)) :=
   match l with
   | CList.CCons t tl =>
-    do
+    do {
     let (c, list_tail_back) ← list_tail tl
     let back := fun ret => let tl1 := list_tail_back ret
                            CList.CCons t tl1
@@ -130,13 +127,13 @@ partial_fixpoint
 
 /- Trait declaration: [demo::Counter]
    Source: 'tests/src/demo.rs', lines 100:0-102:1 -/
-structure Counter (Self : Type) where
+structure Counter where
   incr : Self → Result (Usize × Self)
 
 /- [demo::{demo::Counter for usize}::incr]:
    Source: 'tests/src/demo.rs', lines 105:4-109:5 -/
 def CounterUsize.incr (self : Usize) : Result (Usize × Usize) :=
-  do
+  do {
   let self1 ← self + 1#usize
   ok (self, self1)
 
@@ -149,14 +146,13 @@ def CounterUsize : Counter Usize := {
 
 /- [demo::use_counter]:
    Source: 'tests/src/demo.rs', lines 112:0-114:1 -/
-def use_counter
-  {T : Type} (CounterInst : Counter T) (cnt : T) : Result (Usize × T) :=
+def use_counter (CounterInst : Counter T) (cnt : T) : Result (Usize × T) :=
   CounterInst.incr cnt
 
 /- [demo::mod_add]:
    Source: 'tests/src/demo.rs', lines 117:0-125:1 -/
 def mod_add (a : U32) (b : U32) : Result U32 :=
-  do
+  do {
   massert (a < 3329#u32)
   massert (b < 3329#u32)
   let sum ← a + b

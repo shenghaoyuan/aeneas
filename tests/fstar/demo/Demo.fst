@@ -17,8 +17,7 @@ assume val core_num_U32_wrapping_sub : u32 -> u32 -> result u32
 
 (** [demo::choose]:
     Source: 'tests/src/demo.rs', lines 8:0-14:1 *)
-let choose
-  (#t : Type0) (b : bool) (x : t) (y : t) : result (t & (t -> (t & t))) =
+let choose (b : bool) (x : t) (y : t) : result (t & (t -> (t & t))) =
   if b
   then let back = fun ret -> (ret, y) in Ok (x, back)
   else let back = fun ret -> (x, ret) in Ok (y, back)
@@ -45,13 +44,11 @@ let use_incr : result unit =
 
 (** [demo::CList]
     Source: 'tests/src/demo.rs', lines 37:0-40:1 *)
-type cList_t (t : Type0) =
-| CList_CCons : t -> cList_t t -> cList_t t
-| CList_CNil : cList_t t
+type cList_t = | CList_CCons : t cList_t t cList_t t | CList_CNil : cList_t t
 
 (** [demo::list_nth]:
     Source: 'tests/src/demo.rs', lines 42:0-55:1 *)
-let rec list_nth (#t : Type0) (n : nat) (l : cList_t t) (i : u32) : result t =
+let rec list_nth (n : nat) (l : cList_t t) (i : u32) : result t =
   if is_zero n
   then Fail OutOfFuel
   else
@@ -64,8 +61,7 @@ let rec list_nth (#t : Type0) (n : nat) (l : cList_t t) (i : u32) : result t =
 
 (** [demo::list_nth1]: loop 0:
     Source: 'tests/src/demo.rs', lines 58:4-66:1 *)
-let rec list_nth1_loop
-  (#t : Type0) (n : nat) (l : cList_t t) (i : u32) : result t =
+let rec list_nth1_loop (n : nat) (l : cList_t t) (i : u32) : result t =
   if is_zero n
   then Fail OutOfFuel
   else
@@ -78,15 +74,13 @@ let rec list_nth1_loop
 
 (** [demo::list_nth1]:
     Source: 'tests/src/demo.rs', lines 57:0-66:1 *)
-let list_nth1 (#t : Type0) (n : nat) (l : cList_t t) (i : u32) : result t =
+let list_nth1 (n : nat) (l : cList_t t) (i : u32) : result t =
   list_nth1_loop n l i
 
 (** [demo::list_nth_mut]:
     Source: 'tests/src/demo.rs', lines 68:0-81:1 *)
 let rec list_nth_mut
-  (#t : Type0) (n : nat) (l : cList_t t) (i : u32) :
-  result (t & (t -> cList_t t))
-  =
+  (n : nat) (l : cList_t t) (i : u32) : result (t & (t -> cList_t t)) =
   if is_zero n
   then Fail OutOfFuel
   else
@@ -119,9 +113,7 @@ let rec i32_id (n : nat) (i : i32) : result i32 =
 (** [demo::list_tail]:
     Source: 'tests/src/demo.rs', lines 91:0-96:1 *)
 let rec list_tail
-  (#t : Type0) (n : nat) (l : cList_t t) :
-  result ((cList_t t) & (cList_t t -> cList_t t))
-  =
+  (n : nat) (l : cList_t t) : result ((cList_t t) & (cList_t t -> cList_t t)) =
   if is_zero n
   then Fail OutOfFuel
   else
@@ -137,7 +129,7 @@ let rec list_tail
 
 (** Trait declaration: [demo::Counter]
     Source: 'tests/src/demo.rs', lines 100:0-102:1 *)
-noeq type counter_t (self : Type0) = { incr : self -> result (usize & self); }
+noeq type counter_t = { incr : self -> result (usize & self); }
 
 (** [demo::{demo::Counter for usize}::incr]:
     Source: 'tests/src/demo.rs', lines 105:4-109:5 *)
@@ -150,8 +142,7 @@ let counterUsize : counter_t usize = { incr = counterUsize_incr; }
 
 (** [demo::use_counter]:
     Source: 'tests/src/demo.rs', lines 112:0-114:1 *)
-let use_counter
-  (#t : Type0) (counterInst : counter_t t) (cnt : t) : result (usize & t) =
+let use_counter (counterInst : counter_t t) (cnt : t) : result (usize & t) =
   counterInst.incr cnt
 
 (** [demo::mod_add]:

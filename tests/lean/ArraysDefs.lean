@@ -11,8 +11,7 @@ namespace arrays_defs
 /- [arrays_defs::clone_array]:
    Source: 'tests/src/arrays_defs.rs', lines 3:0-5:1 -/
 def clone_array
-  {T : Type} {N : Usize} (corecloneCloneInst : core.clone.Clone T)
-  (x : Array T N) :
+  (corecloneCloneInst : core.clone.Clone T) (x : Array T N) :
   Result (Array T N)
   :=
   core.array.CloneArray.clone corecloneCloneInst x

@@ -12,8 +12,8 @@ Module Hashmap_Types.
 
 (** [hashmap::AList]
     Source: 'tests/src/hashmap.rs', lines 28:0-31:1 *)
-Inductive AList_t (T : Type) :=
-| AList_Cons : usize -> T -> AList_t T -> AList_t T
+Inductive AList_t :=
+| AList_Cons : usize T AList_t T AList_t T
 | AList_Nil : AList_t T
 .
 
@@ -30,7 +30,7 @@ mkFraction_t {
 
 (** [hashmap::HashMap]
     Source: 'tests/src/hashmap.rs', lines 50:0-62:1 *)
-Record HashMap_t (T : Type) :=
+Record HashMap_t :=
 mkHashMap_t {
   hashMap_num_entries : usize;
   hashMap_max_load_factor : Fraction_t;

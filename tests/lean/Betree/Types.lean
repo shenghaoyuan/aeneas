@@ -11,22 +11,22 @@ namespace betree
 
 /- [betree::betree::List]
    Source: 'src/betree.rs', lines 17:0-20:1 -/
-inductive betree.List (T : Type) where
-| Cons : T → betree.List T → betree.List T
+inductive betree.List where
+| Cons : T betree.List T betree.List T
 | Nil : betree.List T
 
 /- [betree::betree::UpsertFunState]
    Source: 'src/betree.rs', lines 63:0-66:1 -/
 inductive betree.UpsertFunState where
-| Add : U64 → betree.UpsertFunState
-| Sub : U64 → betree.UpsertFunState
+| Add : U64 betree.UpsertFunState
+| Sub : U64 betree.UpsertFunState
 
 /- [betree::betree::Message]
    Source: 'src/betree.rs', lines 69:0-117:1 -/
 inductive betree.Message where
-| Insert : U64 → betree.Message
+| Insert : U64 betree.Message
 | Delete : betree.Message
-| Upsert : betree.UpsertFunState → betree.Message
+| Upsert : betree.UpsertFunState betree.Message
 
 /- [betree::betree::Leaf]
    Source: 'src/betree.rs', lines 167:0-171:1 -/
@@ -39,13 +39,13 @@ mutual
 /- [betree::betree::Internal]
    Source: 'src/betree.rs', lines 156:0-161:1 -/
 inductive betree.Internal where
-| mk : U64 → U64 → betree.Node → betree.Node → betree.Internal
+| mk : U64 U64 betree.Node betree.Node betree.Internal
 
 /- [betree::betree::Node]
    Source: 'src/betree.rs', lines 179:0-184:1 -/
 inductive betree.Node where
-| Internal : betree.Internal → betree.Node
-| Leaf : betree.Leaf → betree.Node
+| Internal : betree.Internal betree.Node
+| Leaf : betree.Leaf betree.Node
 
 end
 

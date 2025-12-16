@@ -724,7 +724,7 @@ and extract_function_call (span : Meta.span) (ctx : extraction_ctx)
           F.pp_print_string fmt fun_name);
 
       (* Sanity check: HOL4 doesn't support const generics *)
-      [%sanity_check] span (generics.const_generics = [] || (backend () <> HOL4 && backend () <> Isabelle));
+      [%sanity_check] span (generics.const_generics = [] || (backend () <> HOL4));
       (* Compute the information about the explicit/implicit input type parameters *)
       let explicit =
         let lookup is_trait_method fun_decl_id lp_id =

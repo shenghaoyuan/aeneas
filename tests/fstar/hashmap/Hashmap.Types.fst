@@ -8,8 +8,8 @@ include Hashmap.TypesExternal
 
 (** [hashmap::AList]
     Source: 'tests/src/hashmap.rs', lines 28:0-31:1 *)
-type aList_t (t : Type0) =
-| AList_Cons : usize -> t -> aList_t t -> aList_t t
+type aList_t =
+| AList_Cons : usize t aList_t t aList_t t
 | AList_Nil : aList_t t
 
 (** [hashmap::Fraction]
@@ -18,7 +18,7 @@ type fraction_t = { dividend : usize; divisor : usize; }
 
 (** [hashmap::HashMap]
     Source: 'tests/src/hashmap.rs', lines 50:0-62:1 *)
-type hashMap_t (t : Type0) =
+type hashMap_t =
 {
   num_entries : usize;
   max_load_factor : fraction_t;

@@ -24,8 +24,7 @@ Check (test_incr)%return.
 
 (** [paper::choose]:
     Source: 'tests/src/paper.rs', lines 17:0-23:1 *)
-Definition choose
-  {T : Type} (b : bool) (x : T) (y : T) : result (T * (T -> (T * T))) :=
+Definition choose (b : bool) (x : T) (y : T) : result (T * (T -> (T * T))) :=
   if b
   then let back := fun (ret : T) => (ret, y) in Ok (x, back)
   else let back := fun (ret : T) => (x, ret) in Ok (y, back)
@@ -48,10 +47,7 @@ Check (test_choose)%return.
 
 (** [paper::List]
     Source: 'tests/src/paper.rs', lines 37:0-40:1 *)
-Inductive List_t (T : Type) :=
-| List_Cons : T -> List_t T -> List_t T
-| List_Nil : List_t T
-.
+Inductive List_t := | List_Cons : T List_t T List_t T | List_Nil : List_t T.
 
 Arguments List_Cons { _ }.
 Arguments List_Nil { _ }.
@@ -59,7 +55,7 @@ Arguments List_Nil { _ }.
 (** [paper::list_nth_mut]:
     Source: 'tests/src/paper.rs', lines 44:0-57:1 *)
 Fixpoint list_nth_mut
-  {T : Type} (l : List_t T) (i : u32) : result (T * (T -> List_t T)) :=
+  (l : List_t T) (i : u32) : result (T * (T -> List_t T)) :=
   match l with
   | List_Cons x tl =>
     if i s= 0%u32
