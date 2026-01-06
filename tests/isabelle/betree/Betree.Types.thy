@@ -26,3 +26,23 @@ record betree_Leaf_t = id : u64
 datatype
   (* [betree::betree::Internal]
      Source: 'src/betree.rs', lines 156:0-161:1 *)
+  datatype betree_Internal_t =
+  | mk u64 of  u64 of  betree_Node_t of  betree_Node_t ⇒ betree_Internal_t
+  
+  (* [betree::betree::Node]
+     Source: 'src/betree.rs', lines 179:0-184:1 *)
+  and betree_Node_t =
+  | Betree_Node_Internal betree_Internal_t ⇒ betree_Node_t
+  | Betree_Node_Leaf betree_Leaf_t ⇒ betree_Node_t
+(* [betree::betree::Params]
+   Source: 'src/betree.rs', lines 187:0-199:1 *)
+record betree_Params_t = min_flush_size : u64
+                         split_size : u64(* [betree::betree::NodeIdCounter]
+                                            Source: 'src/betree.rs', lines 201:0-203:1 *)
+record betree_NodeIdCounter_t = next_node_id : u64(* [betree::betree::BeTree]
+                                                     Source: 'src/betree.rs', lines 218:0-225:1 *)
+record betree_BeTree_t =
+  params : betree_Params_t
+  node_id_cnt : betree_NodeIdCounter_t
+  root : betree_Node_t
+end

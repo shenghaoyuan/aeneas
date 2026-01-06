@@ -12,7 +12,7 @@ type t =
 [@@deriving ord, sexp]
 
 (* TODO: reactivate HOL4 once traits are parameterized by their associated types *)
-let all = [ Coq; Lean; FStar; Isabelle; BorrowCheck ]
+let all = [ Coq; Lean; FStar; BorrowCheck ]
 
 let of_string = function
   | "coq" -> Coq

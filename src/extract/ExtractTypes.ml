@@ -86,7 +86,7 @@ let extract_literal (span : Meta.span) (fmt : F.formatter) (is_pattern : bool)
           if inside then F.pp_print_string fmt ")"
         | Isabelle ->  (* Isabelle *)
           F.pp_print_string fmt "(CHR ";
-          F.pp_print_string fmt (string_of_int (Char.code c));
+          F.pp_print_string fmt ("''" ^ (string_of_int (Char.code c)) ^ "''");
           F.pp_print_string fmt ")"
     )
   | VChar _ | VFloat _ | VStr _ | VByteStr _ ->
