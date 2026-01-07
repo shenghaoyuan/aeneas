@@ -5,13 +5,14 @@ theory Primitives
   imports
     Main
     "HOL-Library.Word" (* For eventual bitwise ops *)
-    "HOL-Library.String"
-    "HOL-Library.Code_Char"
+    (*"HOL-Library.String"
+    "HOL-Library.Code_Char" *)
 begin
 
 (* Aeneas imports *)
+(*
 nitpick_params [off]
-quickcheck_params [off]
+quickcheck_params [off] *)
 
 (*** Result *)
 
@@ -38,17 +39,18 @@ definition massert :: "bool ⇒ unit result" where
   "massert b ≡ if b then return () else fail Failure"
 
 (** Unwrap a successful result (used for globals). Panics on failure. *)
-definition get_result :: "'a result ⇒ 'a" where
-  "get_result (Ok x) = x"
-| "get_result (Fail e) = undefined"
+primrec (nonexhaustive) get_result :: "'a result ⇒ 'a" where
+  "get_result (Ok x) = x" (*
+| "get_result (Fail e) = undefined" *)
 
 (*** Misc *)
 
 type_synonym string = String.string
 type_synonym char = char
 
+(*
 definition char_of_byte :: "Word.word8 ⇒ char" where
-  "char_of_byte = Code_Char.char_of_byte"
+  "char_of_byte = Code_Char.char_of_byte" *)
 
 definition core_mem_replace :: "'a ⇒ 'a ⇒ ('a × 'a)" where
   "core_mem_replace x y ≡ (x, x)"
@@ -205,8 +207,13 @@ definition scalar_leb  :: "'a::order ⇒ 'a ⇒ bool" where "scalar_leb = (≤)"
 definition scalar_ltb  :: "'a::linorder ⇒ 'a ⇒ bool" where "scalar_ltb = (<)"
 definition scalar_geb  :: "'a::order ⇒ 'a ⇒ bool" where "scalar_geb = (≥)"
 definition scalar_gtb  :: "'a::linorder ⇒ 'a ⇒ bool" where "scalar_gtb = (>)"
+
+(*
 definition scalar_eqb  :: "'a::eq ⇒ 'a ⇒ bool" where "scalar_eqb = (=)"
-definition scalar_neqb :: "'a::eq ⇒ 'a ⇒ bool" where "scalar_neqb = (≠)"
+definition scalar_neqb :: "'a::eq ⇒ 'a ⇒ bool" where "scalar_neqb = (≠)" 
+*)
+definition scalar_eqb  :: "'a::order ⇒ 'a ⇒ bool" where "scalar_eqb = (=)"
+definition scalar_neqb :: "'a::order ⇒ 'a ⇒ bool" where "scalar_neqb = (≠)" 
 
 (* Concrete operator definitions *)
 definition i8_neg    :: "i8 ⇒ i8 result"    where "i8_neg = scalar_neg I8"
@@ -262,17 +269,18 @@ axiomatization core_clone_CloneU32 :: "u32 core_clone_Clone"
 record 'self core_marker_Copy =
   cloneInst :: "'self core_clone_Clone"
 
+(*
 definition core_marker_CopyU8 :: "u8 core_marker_Copy" where
-  "core_marker_CopyU8 = (| cloneInst = core_clone_CloneU8 |)"
+  "core_marker_CopyU8 = (| cloneInst = core_clone_CloneU8 |)" *)
 (* ... other scalar copy instances ... *)
 axiomatization core_marker_CopyI8 :: "i8 core_marker_Copy"
 axiomatization core_marker_CopyU32 :: "u32 core_marker_Copy"
 (* ... *)
 
 (** [core::option::{core::option::Option<T>}::unwrap] *)
-definition core_option_Option_unwrap :: "'a option ⇒ 'a result" where
-  "core_option_Option_unwrap (Some x) = Ok x"
-| "core_option_Option_unwrap None = Fail Failure"
+fun core_option_Option_unwrap :: "'a option ⇒ 'a result" where
+  "core_option_Option_unwrap (Some x) = (Ok x)" |
+  "core_option_Option_unwrap None = Fail Failure"
 
 (*** core::ops *)
 
@@ -309,11 +317,12 @@ definition alloc_boxed_Box_coreopsDerefInst :: "'a ⇒ ('a, 'a) core_ops_deref_D
     core_ops_deref_Deref_deref = (λx. Ok (alloc_boxed_Box_deref x))
   |)"
 
+(*
 definition alloc_boxed_Box_coreopsDerefMutInst :: "'a ⇒ ('a, 'a) core_ops_deref_DerefMut" where
-  "alloc_boxed_Box_coreopsDerefMutInst _ = (|
+  "alloc_boxed_Box_coreopsDerefMutInst x = (|
     core_ops_deref_DerefMut_derefInst = alloc_boxed_Box_coreopsDerefInst (),
     core_ops_deref_DerefMut_deref_mut = (λx. Ok (alloc_boxed_Box_deref_mut x))
-  |)"
+  |)" *)
 
 
 (*** Arrays / Slices / Vectors *)
@@ -329,15 +338,18 @@ axiomatization array_repeat :: "usize ⇒ 'a ⇒ 'a array result"
 axiomatization array_index_usize :: "'a array ⇒ usize ⇒ 'a result"
 axiomatization array_update_usize :: "'a array ⇒ usize ⇒ 'a ⇒ 'a array result"
 
-definition array_index_mut_usize :: "'a array ⇒ usize ⇒ ('a × ('a ⇒ 'a array)) result" where
+axiomatization array_index_mut_usize :: "'a array ⇒ usize ⇒ ('a × ('a ⇒ 'a array)) result"
+(*
+primrec (nonexhaustive) array_index_mut_usize :: "'a array ⇒ usize ⇒ ('a × ('a ⇒ 'a array)) result" where
   "array_index_mut_usize a i = (
     array_index_usize a i >>= (λx.
-    return (x, (λnx. (case array_update_usize a i nx of Ok a' ⇒ a' | Fail e ⇒ undefined (* Or panics *))))
-  ))"
+    return (x, (λnx. (case array_update_usize a i nx of Ok a' ⇒ a'))) 
+  ))" *)
+(* | Fail e ⇒ undefined (* Or panics *) *)
 
 (* Slices *)
 definition slice_len :: "'a slice ⇒ usize" where
-  "slice_len s = (let n = length s in if n ≤ usize_max then n else 0 (* Should be safe *) )"
+  "slice_len s = (let n = of_nat (length s) in if  n ≤ usize_max then n else 0  )" (* Should be safe *)
 axiomatization slice_index_usize :: "'a slice ⇒ usize ⇒ 'a result"
 axiomatization slice_update_usize :: "'a slice ⇒ usize ⇒ 'a ⇒ 'a slice result"
 
@@ -361,21 +373,21 @@ axiomatization slice_update_subslice :: "'a slice ⇒ 'a core_ops_range_Range �
 
 (* Vectors *)
 definition alloc_vec_Vec_to_list :: "'a alloc_vec_Vec ⇒ 'a list" where "alloc_vec_Vec_to_list v = v"
-definition alloc_vec_Vec_length :: "'a alloc_vec_Vec ⇒ int" where "alloc_vec_Vec_length v = length v"
+definition alloc_vec_Vec_length :: "'a alloc_vec_Vec ⇒ int" where "alloc_vec_Vec_length v = of_nat (length v)"
 definition alloc_vec_Vec_new :: "'a alloc_vec_Vec" where "alloc_vec_Vec_new = []"
 
 definition alloc_vec_Vec_len :: "'a alloc_vec_Vec ⇒ usize result" where
-  "alloc_vec_Vec_len v = mk_usize (length v)"
+  "alloc_vec_Vec_len v = mk_usize (of_nat (length v))"
 
 definition alloc_vec_Vec_push :: "'a alloc_vec_Vec ⇒ 'a ⇒ ('a alloc_vec_Vec) result" where
   "alloc_vec_Vec_push v x = (
     let l = v @ [x] in
-    if length l ≤ usize_max then return l else fail OutOfFuel
+    if of_nat (length l) ≤ usize_max then return l else fail OutOfFuel
   )"
 
 definition alloc_vec_Vec_insert :: "'a alloc_vec_Vec ⇒ usize ⇒ 'a ⇒ ('a alloc_vec_Vec) result" where
   "alloc_vec_Vec_insert v i x = (
-    if i < length v then return (List.update v i x)
+    if i < of_nat (length v) then return (list_update v (nat i) x)
     else fail Failure
   )"
 
@@ -427,6 +439,7 @@ definition core_slice_index_private_slice_index_SealedRangeUsizeInst
   :: "usize core_ops_range_Range core_slice_index_private_slice_index_Sealed"
   where "core_slice_index_private_slice_index_SealedRangeUsizeInst = ()"
 
+(*
 definition core_slice_index_SliceIndexRangeUsizeSliceInst :: "'a ⇒ (usize core_ops_range_Range, 'a slice, 'a slice) core_slice_index_SliceIndex"
   where "core_slice_index_SliceIndexRangeUsizeSliceInst _ = (|
     core_slice_index_SliceIndex_sealedInst = core_slice_index_private_slice_index_SealedRangeUsizeInst,
@@ -436,7 +449,7 @@ definition core_slice_index_SliceIndexRangeUsizeSliceInst :: "'a ⇒ (usize core
     core_slice_index_SliceIndex_get_unchecked_mut = core_slice_index_SliceIndexRangeUsizeSlice_get_unchecked_mut,
     core_slice_index_SliceIndex_index = core_slice_index_SliceIndexRangeUsizeSlice_index,
     core_slice_index_SliceIndex_index_mut = core_slice_index_SliceIndexRangeUsizeSlice_index_mut
-  |)"
+  |)" *)
 
 (* ... and so on for all trait impls ... *)
 (* This is a representative subset. *)
