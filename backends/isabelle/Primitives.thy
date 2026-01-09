@@ -98,6 +98,7 @@ definition u64_max  :: int where "u64_max = 18446744073709551615"
 definition u128_min :: int where "u128_min = 0"
 definition u128_max :: int where "u128_max = 340282366920938463463374607431768211455"
 
+
 axiomatization isize_min :: int and isize_max :: int and usize_max :: int
 where
   isize_min_bound: "isize_min ≤ i32_min" and
@@ -158,6 +159,7 @@ definition mk_u32   :: "int ⇒ u32 result"   where "mk_u32 = mk_scalar U32"
 definition mk_u64   :: "int ⇒ u64 result"   where "mk_u64 = mk_scalar U64"
 definition mk_u128  :: "int ⇒ u128 result"  where "mk_u128 = mk_scalar U128"
 definition mk_usize :: "int ⇒ usize result" where "mk_usize = mk_scalar Usize"
+
 
 (* Scalar operations *)
 definition scalar_add :: "scalar_ty ⇒ int ⇒ int ⇒ int result" where
@@ -245,6 +247,75 @@ axiomatization
 (** Small utility *)
 definition usize_to_nat :: "usize ⇒ nat" where
   "usize_to_nat x = (if x < 0 then 0 else nat x)"
+
+(** Constants *)
+definition core_num_U8_MIN :: u32 where
+  "core_num_U8_MIN = u8_min"
+
+definition core_num_U16_MIN :: u32 where
+  "core_num_U16_MIN = u16_min"
+
+definition core_num_U32_MIN :: u32 where
+  "core_num_U32_MIN = u32_min"
+
+definition core_num_U64_MIN :: u64 where
+  "core_num_U64_MIN = u64_min"
+
+definition core_num_U128_MIN :: u128 where
+  "core_num_U128_MIN = u64_min" 
+
+axiomatization core_num_Usize_MIN :: usize
+
+definition core_num_I8_MIN :: i32 where
+  "core_num_I8_MIN = i8_min"
+
+definition core_num_I16_MIN :: i32 where
+  "core_num_I16_MIN = i16_min"
+
+definition core_num_I32_MIN :: i32 where
+  "core_num_I32_MIN = i32_min"
+
+definition core_num_I64_MIN :: i64 where
+  "core_num_I64_MIN = i64_min"
+
+definition core_num_I128_MIN :: i128 where
+  "core_num_I128_MIN = i64_min" 
+
+axiomatization core_num_Isize_MIN :: isize
+
+definition core_num_U8_MAX :: u32 where
+  "core_num_U8_MAX = u8_max"
+
+definition core_num_U16_MAX :: u32 where
+  "core_num_U16_MAX = u16_max"
+
+definition core_num_U32_MAX :: u32 where
+  "core_num_U32_MAX = u32_max"
+
+definition core_num_U64_MAX :: u64 where
+  "core_num_U64_MAX = u64_max"
+
+definition core_num_U128_MAX :: u128 where
+  "core_num_U128_MAX = u64_max"
+
+axiomatization core_num_Usize_MAX :: usize 
+
+definition core_num_I8_MAX :: i32 where
+  "core_num_I8_MAX = i8_max"
+
+definition core_num_I16_MAX :: i32 where
+  "core_num_I16_MAX = i16_max"
+
+definition core_num_I32_MAX :: i32 where
+  "core_num_I32_MAX = i32_max"
+
+definition core_num_I64_MAX :: i64 where
+  "core_num_I64_MAX = i64_max"
+
+definition core_num_I128_MAX :: i128 where
+  "core_num_I128_MAX = i64_max"
+
+axiomatization core_num_Isize_MAX :: isize
 
 (*** core *)
 
@@ -454,4 +525,4 @@ definition core_slice_index_SliceIndexRangeUsizeSliceInst :: "'a ⇒ (usize core
 (* ... and so on for all trait impls ... *)
 (* This is a representative subset. *)
 
-end
+endvvvvvvvvvv
