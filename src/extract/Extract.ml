@@ -292,7 +292,8 @@ let rec extract_tpattern (span : Meta.span) (ctx : extraction_ctx)
     | POpen (v, _) ->
         let vname = ctx_compute_var_basename span ctx v.basename v.ty in
         let ctx, vname = ctx_add_var span vname v.id ctx in
-        F.pp_print_string fmt vname;
+        if backend () = Isabelle then ()
+        else F.pp_print_string fmt vname;
         ctx
     | PDummy ->
         F.pp_print_string fmt "_";
@@ -555,12 +556,12 @@ let rec extract_texpr (span : Meta.span) (ctx : extraction_ctx)
   match e.e with
   | FVar var_id ->
       let var_name = ctx_get_var span var_id ctx in
-      F.pp_print_string fmt var_name
+      F.pp_print_string fmt var_name;
   | BVar _ -> [%internal_error] span
   | CVar var_id ->
       let var_name = ctx_get_const_generic_var span Item var_id ctx in
       F.pp_print_string fmt var_name
-  | Const cv -> extract_literal span fmt is_pattern inside cv
+  | Const cv -> extract_literal span fmt is_pattern inside cv;
   | App _ ->
       let app, args = destruct_apps e in
       extract_App span ctx fmt inside app args
@@ -1504,45 +1505,78 @@ let extract_fun_parameters (space : bool ref) (ctx : extraction_ctx)
     ctx_add_generic_params def.item_meta.span def.item_meta.name Item
       def.signature.llbc_generics def.signature.generics ctx
   in
-  (* Print the generics *)
-  (* Open a box for the generics *)
-  F.pp_open_hovbox fmt 0;
-  let explicit = def.signature.explicit_info in
-  (let space = Some space in
-   extract_generic_params def.item_meta.span ctx fmt TypeDeclId.Set.empty ~space
-     Item def.signature.generics (Some explicit) type_params cg_params
-     trait_clauses);
-  (* Close the box for the generics *)
-  F.pp_close_box fmt ();
-  (* The input parameters - note that doing this adds bindings to the context *)
-  let ctx_body =
-    match def.body with
-    | None -> ctx
-    | Some body ->
-        List.fold_left
-          (fun ctx (lv : tpattern) ->
-            insert_req_space fmt space;
-            (* Open a box for the input parameter *)
-            F.pp_open_hovbox fmt 0;
-            F.pp_print_string fmt "(";
-            let ctx =
-              extract_tpattern def.item_meta.span ctx fmt true false lv
-            in
-            F.pp_print_space fmt ();
-            F.pp_print_string fmt ":";
-            F.pp_print_space fmt ();
-            extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty false
-              lv.ty;
-            F.pp_print_string fmt ")";
-            (* Close the box for the input parameters *)
-            F.pp_close_box fmt ();
-            ctx)
-          ctx body.inputs
-  in
-  let type_params = List.combine explicit.explicit_types type_params in
-  let cg_params = List.combine explicit.explicit_const_generics cg_params in
-  let trait_clauses = List.map (fun x -> (Explicit, x)) trait_clauses in
-  (ctx, ctx_body, List.concat [ type_params; cg_params; trait_clauses ])
+  match backend () with
+    | Isabelle ->
+      F.pp_print_string fmt ":: \"";
+      let explicit = def.signature.explicit_info in
+      let ctx_body =
+        match def.body with
+        | None -> ctx
+        | Some body ->
+            List.fold_left
+              (fun ctx (lv : tpattern) ->
+                insert_req_space fmt space;
+                (* Open a box for the input parameter *)
+                F.pp_open_hovbox fmt 0;
+                let ctx =
+                  extract_tpattern def.item_meta.span ctx fmt true false lv
+                in
+                extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty false
+                  lv.ty;
+                F.pp_print_space fmt ();
+                F.pp_print_string fmt "⇒";
+                (* Close the box for the input parameters *)
+                F.pp_close_box fmt ();
+                ctx)
+              ctx body.inputs
+      in
+      (*F.pp_print_string fmt "\"";*)
+      let type_params = List.combine explicit.explicit_types type_params in
+      let cg_params = List.combine explicit.explicit_const_generics cg_params in
+      let trait_clauses = List.map (fun x -> (Explicit, x)) trait_clauses in
+      (ctx, ctx_body, List.concat [ type_params; cg_params; trait_clauses ])
+      
+    | _ -> 
+      (* Print the generics *)
+      (* Open a box for the generics *)
+      F.pp_open_hovbox fmt 0;
+      let explicit = def.signature.explicit_info in
+      (let space = Some space in
+      extract_generic_params def.item_meta.span ctx fmt TypeDeclId.Set.empty ~space
+        Item def.signature.generics (Some explicit) type_params cg_params
+        trait_clauses);
+      (* Close the box for the generics *)
+      F.pp_close_box fmt ();
+      
+      (* The input parameters - note that doing this adds bindings to the context *)
+      let ctx_body =
+        match def.body with
+        | None -> ctx
+        | Some body ->
+            List.fold_left
+              (fun ctx (lv : tpattern) ->
+                insert_req_space fmt space;
+                (* Open a box for the input parameter *)
+                F.pp_open_hovbox fmt 0;
+                F.pp_print_string fmt "(";
+                let ctx =
+                  extract_tpattern def.item_meta.span ctx fmt true false lv
+                in
+                F.pp_print_space fmt ();
+                F.pp_print_string fmt ":";
+                F.pp_print_space fmt ();
+                extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty false
+                  lv.ty;
+                F.pp_print_string fmt ")";
+                (* Close the box for the input parameters *)
+                F.pp_close_box fmt ();
+                ctx)
+              ctx body.inputs
+      in
+      let type_params = List.combine explicit.explicit_types type_params in
+      let cg_params = List.combine explicit.explicit_const_generics cg_params in
+      let trait_clauses = List.map (fun x -> (Explicit, x)) trait_clauses in
+      (ctx, ctx_body, List.concat [ type_params; cg_params; trait_clauses ])
 
 (** A small utility to print the types of the input parameters in the form:
     [u32 -> list u32 -> ...] (we don't print the return type of the function)
@@ -1870,91 +1904,104 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
    * it introduces bindings in the context... We thus "forget"
    * the bindings we introduced above.
    * TODO: figure out a cleaner way *)
-  let _ =
-    if use_forall then F.pp_print_string fmt ","
-    else (
-      insert_req_space fmt space;
-      F.pp_print_string fmt ":");
-    (* Close the box for "(PARAMS) :" *)
-    F.pp_close_box fmt ();
+  (match backend () with
+  | Isabelle ->
     F.pp_print_space fmt ();
-    (* Open a box for the EFFECT *)
-    F.pp_open_hvbox fmt 0;
-    (* Open a box for the return type *)
-    F.pp_open_hovbox fmt ctx.indent_incr;
-    (* Print the return type *)
-    (* For opaque definitions, as we don't have named parameters under the hand,
-     * we don't print parameters in the form [(x : a) (y : b) ...] above,
-     * but wait until here to print the types: [a -> b -> ...]. *)
     if is_opaque then
       extract_fun_input_parameters_types def.item_meta.span ctx fmt
         def.signature.inputs;
-    (* [Tot] *)
-    if has_decreases_clause then (
-      assert_backend_supports_decreases_clauses def.item_meta.span;
-      if backend () = FStar then (
-        F.pp_print_string fmt "Tot";
-        F.pp_print_space fmt ()));
     extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty
-      has_decreases_clause def.signature.output;
-    (* Close the box for the return type *)
-    F.pp_close_box fmt ();
-    (* Print the decrease clause - rk.: a function with a decreases clause
-     * is necessarily a transparent function *)
-    if has_decreases_clause && backend () = FStar then (
-      assert_backend_supports_decreases_clauses def.item_meta.span;
-      F.pp_print_space fmt ();
-      (* Open a box for the decreases clause *)
-      F.pp_open_hovbox fmt ctx.indent_incr;
-      (* *)
-      F.pp_print_string fmt "(decreases (";
-      F.pp_print_cut fmt ();
-      (* Open a box for the decreases term *)
-      F.pp_open_hovbox fmt ctx.indent_incr;
-      (* The name of the decrease clause *)
-      let decr_name =
-        ctx_get_termination_measure def.item_meta.span def.def_id def.loop_id
-          ctx
-      in
-      F.pp_print_string fmt decr_name;
-      (* Print the generic parameters - TODO: we do this many
-         times, we should have a helper to factor it out *)
-      List.iter
-        (fun (name : string) ->
-          F.pp_print_space fmt ();
-          F.pp_print_string fmt name)
-        (List.filter_map
-           (fun (e, x) -> if e = Implicit then None else Some x)
-           all_params);
-      (* Print the input values: we have to be careful here to print
-       * only the input values which are in common with the *forward*
-       * function (the additional input values "given back" to the
-       * backward functions have no influence on termination: we thus
-       * share the decrease clauses between the forward and the backward
-       * functions - we also ignore the additional state received by the
-       * backward function, if there is one).
-       *)
-      let inputs_lvs = (Option.get def.body).inputs in
-      (* TODO: we should probably print the input variables, not the typed
-         patterns *)
-      let _ =
-        List.fold_left
-          (fun ctx (lv : tpattern) ->
-            F.pp_print_space fmt ();
-            let ctx =
-              extract_tpattern def.item_meta.span ctx fmt true false lv
-            in
-            ctx)
-          ctx inputs_lvs
-      in
-      F.pp_print_string fmt "))";
-      (* Close the box for the decreases term *)
-      F.pp_close_box fmt ();
-      (* Close the box for the decreases clause *)
-      F.pp_close_box fmt ());
-    (* Close the box for the EFFECT *)
+        has_decreases_clause def.signature.output;
+    F.pp_print_string fmt "\"";
     F.pp_close_box fmt ()
-  in
+  | _ ->
+    let _ =
+      if use_forall then F.pp_print_string fmt ","
+      else (
+        insert_req_space fmt space;
+        F.pp_print_string fmt ":");
+      (* Close the box for "(PARAMS) :" *)
+      F.pp_close_box fmt ();
+      F.pp_print_space fmt ();
+      (* Open a box for the EFFECT *)
+      F.pp_open_hvbox fmt 0;
+      (* Open a box for the return type *)
+      F.pp_open_hovbox fmt ctx.indent_incr;
+      (* Print the return type *)
+      (* For opaque definitions, as we don't have named parameters under the hand,
+      * we don't print parameters in the form [(x : a) (y : b) ...] above,
+      * but wait until here to print the types: [a -> b -> ...]. *)
+      if is_opaque then
+        extract_fun_input_parameters_types def.item_meta.span ctx fmt
+          def.signature.inputs;
+      (* [Tot] *)
+      if has_decreases_clause then (
+        assert_backend_supports_decreases_clauses def.item_meta.span;
+        if backend () = FStar then (
+          F.pp_print_string fmt "Tot";
+          F.pp_print_space fmt ()));
+      extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty
+        has_decreases_clause def.signature.output;
+      (* Close the box for the return type *)
+      F.pp_close_box fmt ();
+      (* Print the decrease clause - rk.: a function with a decreases clause
+      * is necessarily a transparent function *)
+      if has_decreases_clause && backend () = FStar then (
+        assert_backend_supports_decreases_clauses def.item_meta.span;
+        F.pp_print_space fmt ();
+        (* Open a box for the decreases clause *)
+        F.pp_open_hovbox fmt ctx.indent_incr;
+        (* *)
+        F.pp_print_string fmt "(decreases (";
+        F.pp_print_cut fmt ();
+        (* Open a box for the decreases term *)
+        F.pp_open_hovbox fmt ctx.indent_incr;
+        (* The name of the decrease clause *)
+        let decr_name =
+          ctx_get_termination_measure def.item_meta.span def.def_id def.loop_id
+            ctx
+        in
+        F.pp_print_string fmt decr_name;
+        (* Print the generic parameters - TODO: we do this many
+          times, we should have a helper to factor it out *)
+        List.iter
+          (fun (name : string) ->
+            F.pp_print_space fmt ();
+            F.pp_print_string fmt name)
+          (List.filter_map
+            (fun (e, x) -> if e = Implicit then None else Some x)
+            all_params);
+        (* Print the input values: we have to be careful here to print
+        * only the input values which are in common with the *forward*
+        * function (the additional input values "given back" to the
+        * backward functions have no influence on termination: we thus
+        * share the decrease clauses between the forward and the backward
+        * functions - we also ignore the additional state received by the
+        * backward function, if there is one).
+        *)
+        let inputs_lvs = (Option.get def.body).inputs in
+        (* TODO: we should probably print the input variables, not the typed
+          patterns *)
+        let _ =
+          List.fold_left
+            (fun ctx (lv : tpattern) ->
+              F.pp_print_space fmt ();
+              let ctx =
+                extract_tpattern def.item_meta.span ctx fmt true false lv
+              in
+              ctx)
+            ctx inputs_lvs
+        in
+        F.pp_print_string fmt "))";
+        (* Close the box for the decreases term *)
+        F.pp_close_box fmt ();
+        (* Close the box for the decreases clause *)
+        F.pp_close_box fmt ());
+      (* Close the box for the EFFECT *)
+      F.pp_close_box fmt ()
+    in ());
+
+
   (* Print the "=" *)
   if not is_opaque then (
     F.pp_print_space fmt ();
@@ -1976,10 +2023,31 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
     (* Extract the body *)
     let _ =
       F.pp_open_hovbox fmt ctx.indent_incr;
+      if backend () = Isabelle then (
+        F.pp_print_string fmt "\"";
+        F.pp_print_string fmt def_name;
+        F.pp_print_space fmt ();
+        (*
+        (match def.body with
+        | None -> ()
+        | Some body ->
+            let first = ref true in
+            List.iter (fun (lv : tpattern) ->
+              if !first then first := false else F.pp_print_string fmt ", ";
+              let param_name = ctx_compute_var_basename def.item_meta.span ctx lv.pat.basename lv.ty in
+              F.pp_print_string fmt param_name
+            ) body.inputs
+        );*)
+        F.pp_print_string fmt "params";
+        F.pp_print_space fmt ();
+        F.pp_print_string fmt "=";
+        F.pp_print_space fmt ();
+      );
       let _ =
         extract_texpr def.item_meta.span ctx_body fmt false
           (Option.get def.body).body
       in
+      if backend () = Isabelle then F.pp_print_string fmt "\"";
       F.pp_close_box fmt ()
     in
     (* Close the box for the body *)
@@ -2153,6 +2221,10 @@ let extract_fun_decl_isabelle_opaque (ctx : extraction_ctx) (fmt : F.formatter)
   F.pp_print_string fmt "axiomatization"; F.pp_print_space fmt ();
   F.pp_print_string fmt def_name; F.pp_print_space fmt ();
   F.pp_print_string fmt "::"; F.pp_print_space fmt ();
+  (* Print type signature *)
+  F.pp_open_hovbox fmt ctx.indent_incr;
+  F.pp_print_string fmt "\"";
+  (*
   (* Print generics *)
   F.pp_open_hovbox fmt 0;
   let space = ref true in
@@ -2161,9 +2233,7 @@ let extract_fun_decl_isabelle_opaque (ctx : extraction_ctx) (fmt : F.formatter)
     Item def.signature.generics (Some explicit) type_params cg_params trait_clauses;
   if not !space then F.pp_print_space fmt ();
   F.pp_close_box fmt ();
-  (* Print type signature *)
-  F.pp_open_hovbox fmt ctx.indent_incr;
-  F.pp_print_string fmt "\"";
+  *)
   extract_fun_input_parameters_types def.item_meta.span ctx fmt def.signature.inputs;
   extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty false def.signature.output;
   F.pp_print_string fmt "\"";
@@ -2253,8 +2323,10 @@ let extract_global_decl_body_gen (span : Meta.span) (ctx : extraction_ctx)
 
   (* Open "TYPE" box (depth=3) *)
   F.pp_open_hovbox fmt ctx.indent_incr;
-  (* Print "TYPE" *)
+  (* Print "TYPE", Isabelle needs double quotations *)
+  F.pp_print_string fmt (match backend () with Isabelle -> "\"" | _ -> "");
   extract_ty span ctx fmt TypeDeclId.Set.empty false ty;
+  F.pp_print_string fmt (match backend () with Isabelle -> "\"" | _ -> "");
   (* Close "TYPE" box (depth=3) *)
   F.pp_close_box fmt ();
 
@@ -2338,6 +2410,7 @@ let extract_global_decl_isabelle_opaque (span : Meta.span) (ctx : extraction_ctx
     (trait_clauses : string list) (ty : ty) : unit =
   F.pp_open_hvbox fmt 0;
   F.pp_open_hovbox fmt ctx.indent_incr;
+
   F.pp_print_string fmt "axiomatization"; F.pp_print_space fmt ();
   F.pp_print_string fmt name; F.pp_print_space fmt ();
   F.pp_print_string fmt "::"; F.pp_print_space fmt ();
@@ -2435,7 +2508,7 @@ let extract_global_decl_aux (ctx : extraction_ctx) (fmt : F.formatter)
       extract_global_decl_body_gen span ctx fmt SingleNonRec ~irreducible:false
         body_name global.generics global.explicit_info type_params cg_params
         trait_clauses body_ty
-        (Some (fun fmt -> extract_texpr span ctx fmt false body.body));
+        (Some (fun fmt -> extract_texpr span ctx fmt (backend () = Isabelle) body.body));
       F.pp_print_break fmt 0 0;
       (* Generate: [let x_c : u32 = eval_global x_body] *)
       extract_global_decl_body_gen span ctx fmt SingleNonRec

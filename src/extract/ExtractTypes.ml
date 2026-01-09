@@ -22,7 +22,7 @@ let extract_literal (span : Meta.span) (fmt : F.formatter) (is_pattern : bool)
       match backend () with
       | FStar -> F.pp_print_string fmt (Z.to_string (Scalars.get_val sv))
       | Coq | HOL4 | Lean | Isabelle ->
-          let print_brackets = inside && backend () = HOL4 in
+          let print_brackets = inside && (backend () = HOL4 || backend () = Isabelle) in
           if print_brackets then F.pp_print_string fmt "(";
           (match backend () with
           | Coq | Lean | Isabelle -> ()
@@ -374,7 +374,7 @@ let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
               `('a, 'b) tree`
           *)
           match backend () with
-          | FStar | Coq | Lean | Isabelle ->
+          | FStar | Coq | Lean  ->
               let print_paren = inside && has_params in
               if print_paren then F.pp_print_string fmt "(";
               (* TODO: for now, only the opaque *functions* are extracted in the
@@ -422,6 +422,57 @@ let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
                     (generics, None)
               in
               extract_generic_args span ctx fmt no_params_tys ~explicit generics;
+              if print_paren then F.pp_print_string fmt ")"
+          | Isabelle ->
+              let print_paren = inside && has_params in
+              if print_paren then F.pp_print_string fmt "(";
+              (* TODO: for now, only the opaque *functions* are extracted in the
+                 opaque module. The opaque *types* are builtin. *)
+              (* We might need to:
+                 - lookup the information about the implicit/explicit parameters
+                   (note that builtin types don't have implicit parameters)
+                 - filter the type arguments, if the type is builtin (for instance,
+                   we filter the global allocator type argument for `Vec`).
+              *)
+              let generics, explicit =
+                match type_id with
+                | TAdtId id -> (
+                    match
+                      TypeDeclId.Map.find_opt id ctx.types_filter_type_args_map
+                    with
+                    | None -> (generics, None)
+                    | Some filter ->
+                        let filter_types : 'a. 'a list -> 'a list =
+                         fun l ->
+                          let l = List.combine filter l in
+                          List.filter_map
+                            (fun (b, ty) -> if b then Some ty else None)
+                            l
+                        in
+                        let types = filter_types generics.types in
+                        let generics = { generics with types } in
+                        let explicit =
+                          match TypeDeclId.Map.find_opt id ctx.trans_types with
+                          | None ->
+                              (* The decl might be missing if there were some errors *)
+                              None
+                          | Some d ->
+                              Some
+                                {
+                                  d.explicit_info with
+                                  explicit_types =
+                                    filter_types d.explicit_info.explicit_types;
+                                }
+                        in
+                        (generics, explicit))
+                | _ ->
+                    (* All the parameters of builtin types are explicit *)
+                    (generics, None)
+              in
+              (*F.pp_print_string fmt "[Debug]";*)
+              extract_generic_args span ctx fmt no_params_tys ~explicit generics;
+              F.pp_print_space fmt ();
+              F.pp_print_string fmt (ctx_get_type (Some span) type_id ctx);
               if print_paren then F.pp_print_string fmt ")"
           | HOL4 ->
               let { types; const_generics; trait_refs } = generics in
@@ -538,7 +589,6 @@ and extract_generic_args (span : Meta.span) (ctx : extraction_ctx)
             filter const_generics explicit.explicit_const_generics )
     in
     if types <> [] then (
-      F.pp_print_space fmt ();
       Collections.List.iter_link (F.pp_print_space fmt)
         (extract_ty span ctx fmt no_params_tys true)
         types);
