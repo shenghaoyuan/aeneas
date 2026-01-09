@@ -1065,11 +1065,11 @@ let extract_file (config : gen_config) (ctx : gen_ctx) (fi : extract_file_info)
       Printf.fprintf out "\ntheory %s\n" fi.module_name;
       Printf.fprintf out "  imports\n";
       (* Add the Aeneas primitives import *)
-      Printf.fprintf out "    Aeneas.Primitives\n";
+      Printf.fprintf out "    Primitives\n";
       (* Add the custom imports and includes *)
       let imports = fi.custom_imports @ fi.custom_includes in
       List.iter (fun m -> Printf.fprintf out "    %s\n" m) imports;
-      Printf.fprintf out "    begin\n\m");
+      Printf.fprintf out "    begin\n\n");
   (* From now onwards, we use the formatter *)
   (* Set the margin *)
   Format.pp_set_margin fmt 80;
