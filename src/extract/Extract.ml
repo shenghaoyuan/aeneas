@@ -1916,6 +1916,7 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
     extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty
         has_decreases_clause def.signature.output;
     F.pp_print_string fmt "\"";
+    (* Close the box for "(PARAMS) :" *)
     F.pp_close_box fmt ()
   | _ ->
     let _ =
@@ -2030,18 +2031,21 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
         F.pp_print_string fmt "\"";
         F.pp_print_string fmt def_name;
         F.pp_print_space fmt ();
-        (*
+        
         (match def.body with
         | None -> ()
         | Some body ->
-            let first = ref true in
             List.iter (fun (lv : tpattern) ->
-              if !first then first := false else F.pp_print_string fmt ", ";
-              let param_name = ctx_compute_var_basename def.item_meta.span ctx lv.pat.basename lv.ty in
-              F.pp_print_string fmt param_name
+              (* Open a box for the input parameter *)
+              F.pp_open_hovbox fmt 0;
+              let _ = 
+                extract_tpattern false def.item_meta.span ctx fmt true false lv
+              in
+              F.pp_print_space fmt ();
+              (* Close the box for the input parameters *)
+              F.pp_close_box fmt ();
             ) body.inputs
-        );*)
-        F.pp_print_string fmt "params";
+        );
         F.pp_print_space fmt ();
         F.pp_print_string fmt "=";
         F.pp_print_space fmt ();
@@ -2211,7 +2215,7 @@ let extract_fun_decl_isabelle_opaque (ctx : extraction_ctx) (fmt : F.formatter)
   let def = { def with body = Option.map (open_all_fun_body def.item_meta.span) def.body } in
   [%sanity_check] def.item_meta.span (def.signature.generics.const_generics = []);
 
-  let ctx, type_params, cg_params, trait_clauses =
+  let ctx, _, _, _ =
     ctx_add_generic_params def.item_meta.span def.item_meta.name Item
       def.signature.llbc_generics def.signature.generics ctx
   in
