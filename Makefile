@@ -80,7 +80,7 @@ build-bin-dir: build-bin build-lib build-runner
 
 .PHONY: isabelle
 isabelle: 
-	rm ./tests/isabelle/*.thy
+	rm -f ./tests/isabelle/*.thy
 	cp ./backends/isabelle/Primitives.thy ./tests/isabelle
 	./bin/aeneas tests/llbc/options_d.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./bin/aeneas tests/llbc/constants0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
