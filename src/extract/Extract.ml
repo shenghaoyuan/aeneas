@@ -1263,15 +1263,22 @@ and extract_Switch (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
       F.pp_close_box fmt ();
 
       (* Extract the branches *)
-      let extract_branch (br : match_branch) : unit =
+      let extract_branch (is_first : bool) (br : match_branch) : unit =
         F.pp_print_space fmt ();
         (* Open a box for the pattern+branch *)
         F.pp_open_hvbox fmt ctx.indent_incr;
         (* Open a box for the pattern *)
         F.pp_open_hovbox fmt ctx.indent_incr;
         (* Print the pattern *)
-        F.pp_print_string fmt "|";
-        F.pp_print_space fmt ();
+        let print_bar = 
+          match backend () with 
+          | Isabelle -> not is_first
+          | _ -> true
+        in
+        if print_bar then (
+          F.pp_print_string fmt "|";
+          F.pp_print_space fmt ();
+        );
         let ctx = extract_tpattern false span ctx fmt false false br.pat in
         F.pp_print_space fmt ();
         let arrow =
@@ -1293,7 +1300,7 @@ and extract_Switch (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
         F.pp_close_box fmt ()
       in
 
-      List.iter extract_branch branches;
+      List.iteri (fun i br -> extract_branch (i = 0) br)  branches;
 
       (* End the match *)
       match backend () with
