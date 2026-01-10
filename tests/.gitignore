@@ -1,2 +1,7 @@
 *.llbc
 target/
+coq/*/*.v
+fstar/*/*.fst
+fstar/*/*.fsti
+lean/*.lean
+lean/*/*.lean
