@@ -1204,7 +1204,7 @@ let builtin_llbc_functions () : (A.builtin_fun_id * string) list =
 
 let builtin_pure_functions () : (pure_builtin_fun_id * string) list =
   match backend () with
-  | FStar | Isabelle ->
+  | FStar ->
       [
         (Return, "return");
         (Fail, "fail");
@@ -1244,6 +1244,17 @@ let builtin_pure_functions () : (pure_builtin_fun_id * string) list =
         (UpdateAtIndex Slice, "slice_update_usize");
         (UpdateAtIndex Array, "array_update_usize");
         (ToResult, "return");
+      ]
+  | Isabelle ->
+      [
+        (Return, "return");
+        (Fail, "fail");
+        (Assert, "massert");
+        (FuelDecrease, "decrease");
+        (FuelEqZero, "is_zero");
+        (UpdateAtIndex Slice, "slice_update_usize");
+        (UpdateAtIndex Array, "array_update_usize");
+        (ToResult, "");
       ]
 
 let names_map_init () : names_map_init =
