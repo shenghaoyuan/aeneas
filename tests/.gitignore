@@ -5,3 +5,5 @@ fstar/*/*.fst
 fstar/*/*.fsti
 lean/*.lean
 lean/*/*.lean
+isabelle/*/*.thy
+isabelle/*.thy

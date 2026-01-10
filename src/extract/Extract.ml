@@ -275,7 +275,8 @@ let fun_builtin_filter_types (id : FunDeclId.id) (types : 'a list)
 
     As a pattern can introduce new variables, we return an extraction context
     updated with new bindings. *)
-let rec extract_tpattern (span : Meta.span) (ctx : extraction_ctx)
+(** not_print_name = true, doesn't print name when the case is the isabelle function declaration; *)
+let rec extract_tpattern (not_print_name: bool) (span : Meta.span) (ctx : extraction_ctx)
     (fmt : F.formatter) (is_let : bool) (inside : bool) ?(with_type = false)
     (v : tpattern) : extraction_ctx =
   if with_type then F.pp_print_string fmt "(";
@@ -292,7 +293,7 @@ let rec extract_tpattern (span : Meta.span) (ctx : extraction_ctx)
     | POpen (v, _) ->
         let vname = ctx_compute_var_basename span ctx v.basename v.ty in
         let ctx, vname = ctx_add_var span vname v.id ctx in
-        if backend () = Isabelle then ()
+        if not_print_name then ()
         else F.pp_print_string fmt vname;
         ctx
     | PDummy ->
@@ -300,7 +301,7 @@ let rec extract_tpattern (span : Meta.span) (ctx : extraction_ctx)
         ctx
     | PAdt av ->
         let extract_value ctx inside v =
-          extract_tpattern span ctx fmt is_let inside v
+          extract_tpattern not_print_name span ctx fmt is_let inside v
         in
         extract_adt_g_value span extract_value fmt ctx is_let inside
           av.variant_id av.fields v.ty
@@ -965,7 +966,7 @@ and extract_Lambda (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
     List.fold_left
       (fun ctx x ->
         F.pp_print_space fmt ();
-        extract_tpattern span ctx fmt true true ~with_type x)
+        extract_tpattern false span ctx fmt true true ~with_type x)
       ctx xl
   in
   F.pp_print_space fmt ();
@@ -1026,15 +1027,16 @@ and extract_lets (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
          ]}
          TODO: cleanup
       *)
-      if monadic && (backend () = Coq || backend () = HOL4) then (
+      if monadic && (backend () = Coq || backend () = HOL4 || backend () = Isabelle) then (
         (* Box for the let .. <- *)
         F.pp_open_hovbox fmt ctx.indent_incr;
-        let ctx = extract_tpattern span ctx fmt true true lv in
+        let ctx = extract_tpattern false span ctx fmt true true lv in
         F.pp_print_space fmt ();
         let arrow =
           match backend () with
           | Coq | HOL4 -> "<-"
-          | FStar | Lean | Isabelle -> [%internal_error] span
+          | Isabelle -> "<-"
+          | FStar | Lean -> [%internal_error] span
         in
         F.pp_print_string fmt arrow;
         F.pp_close_box fmt ();
@@ -1049,6 +1051,7 @@ and extract_lets (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
         (* Check if we can ignore the [let] - it is possible for some backends,
            if the monadic expression evaluates to [()] *)
         let ignore_let =
+        F.pp_print_string fmt " emonadic ";
           monadic && is_dummy_pattern lv && ty_is_unit lv.ty
           && backend () = Lean
         in
@@ -1069,7 +1072,7 @@ and extract_lets (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
             else (
               F.pp_print_string fmt "let";
               F.pp_print_space fmt ());
-            let ctx = extract_tpattern span ctx fmt true true lv in
+            let ctx = extract_tpattern false span ctx fmt true true lv in
             F.pp_print_space fmt ();
             let eq =
               match backend () with
@@ -1258,7 +1261,7 @@ and extract_Switch (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
         (* Print the pattern *)
         F.pp_print_string fmt "|";
         F.pp_print_space fmt ();
-        let ctx = extract_tpattern span ctx fmt false false br.pat in
+        let ctx = extract_tpattern false span ctx fmt false false br.pat in
         F.pp_print_space fmt ();
         let arrow =
           match backend () with
@@ -1519,7 +1522,7 @@ let extract_fun_parameters (space : bool ref) (ctx : extraction_ctx)
                 (* Open a box for the input parameter *)
                 F.pp_open_hovbox fmt 0;
                 let ctx =
-                  extract_tpattern def.item_meta.span ctx fmt true false lv
+                  extract_tpattern (backend () = Isabelle) def.item_meta.span ctx fmt true false lv
                 in
                 extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty false
                   lv.ty;
@@ -1560,7 +1563,7 @@ let extract_fun_parameters (space : bool ref) (ctx : extraction_ctx)
                 F.pp_open_hovbox fmt 0;
                 F.pp_print_string fmt "(";
                 let ctx =
-                  extract_tpattern def.item_meta.span ctx fmt true false lv
+                  extract_tpattern false def.item_meta.span ctx fmt true false lv
                 in
                 F.pp_print_space fmt ();
                 F.pp_print_string fmt ":";
@@ -1987,7 +1990,7 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
             (fun ctx (lv : tpattern) ->
               F.pp_print_space fmt ();
               let ctx =
-                extract_tpattern def.item_meta.span ctx fmt true false lv
+                extract_tpattern false def.item_meta.span ctx fmt true false lv
               in
               ctx)
             ctx inputs_lvs

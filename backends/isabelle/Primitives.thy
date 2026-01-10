@@ -36,7 +36,7 @@ fun bind :: "'a result ⇒ ('a ⇒ 'b result) ⇒ 'b result" (infixl ">>=" 55) w
 
 syntax
   "_do_bind" :: "[pttrn, 'a result, 'b result] ⇒ 'b result" 
-    ("(2_ ← _;// _)" [0, 0, 10] 10)
+    ("(2_ <- _;// _)" [0, 0, 10] 10)
 translations
   "_do_bind x m e" ⇌ "CONST bind m (λx. e)"
 

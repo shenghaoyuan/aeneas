@@ -78,6 +78,10 @@ build-bin-dir: build-bin build-lib build-runner
 	cp -rf backends/fstar/*.fst* bin/backends/fstar/
 	cp -rf backends/coq/*.v bin/backends/coq/
 
+
+.PHONY: ebuild
+etest: build-dev isabelle
+
 .PHONY: isabelle
 isabelle: 
 	rm -f ./tests/isabelle/*.thy
@@ -86,6 +90,7 @@ isabelle:
 	./bin/aeneas tests/llbc/constants0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./bin/aeneas tests/llbc/scalars0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./bin/aeneas tests/llbc/paper0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./bin/aeneas tests/llbc/as_mut.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 
 # TODO: using ppx (in aeneas-ppx) breaks this command
 .PHONY: doc
