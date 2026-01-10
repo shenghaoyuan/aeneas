@@ -59,23 +59,44 @@ pub fn list_nth_mut<'a, T>(l: &'a mut List<T>, i: u32) -> &'a mut T {
         Nil => {
             panic!()
         }
-        Cons(x, tl) => {
+        Cons(x, tl1) => { /*tl is a function in isabelle, cannot use it as variable name*/
             if i == 0 {
                 return x;
             } else {
-                return list_nth_mut(tl, i - 1);
+                return list_nth_mut(tl1, i - 1);
             }
         }
     }
 }
+
+/* expected result:
+  fun list_nth_mut
+    :: "'t List_t ⇒ u32 ⇒ ('t × ('t ⇒ 't List_t)) result" where
+    "list_nth_mut l i 
+      = (
+      case l of
+      List_Cons x tl1 =>
+        if i = (0 :: u32)
+        then let back = λ (ret :: 't) . List_Cons ret tl1 in Ok (x, back)
+        else (
+          i1 <- u32_sub i (1 :: u32);
+          (x1, list_nth_mut_back) <- list_nth_mut tl1 i1;
+          let back =
+            λ (ret :: 't) . let tl1 = list_nth_mut_back ret in List_Cons x tl1
+          in
+          Ok (x1, back))
+      | List_Nil => Fail Failure
+      )"
+
+*/
 
 pub fn sum(l: &List<i32>) -> i32 {
     match l {
         Nil => {
             return 0;
         }
-        Cons(x, tl) => {
-            return *x + sum(tl);
+        Cons(x, tl1) => {
+            return *x + sum(tl1);
         }
     }
 }
