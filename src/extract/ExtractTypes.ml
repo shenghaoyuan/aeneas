@@ -129,15 +129,7 @@ let start_fun_decl_group (ctx : extraction_ctx) (fmt : F.formatter)
     (is_rec : bool) (dg : Pure.fun_decl list) =
   match backend () with
   | FStar | Coq | Lean -> ()
-  | Isabelle -> 
-      (* Isabelle "where" keyword *)
-      if is_rec then (
-        F.pp_print_break fmt 0 0;
-        F.pp_open_vbox fmt 0;
-        F.pp_open_vbox fmt ctx.indent_incr;
-        F.pp_print_string fmt "where";
-        F.pp_print_space fmt ()
-      )
+  | Isabelle -> ()
   | HOL4 ->
       (* In HOL4, opaque functions have a special treatment *)
       if is_single_opaque_fun_decl_group dg then ()
@@ -172,13 +164,7 @@ let end_fun_decl_group (fmt : F.formatter) (is_rec : bool)
       (* For aesthetic reasons, we print the Coq end group delimiter directly
          in {!extract_fun_decl}. *)
       ()
-  | Isabelle ->
-      (* Isabelle *)
-      if is_rec && List.length dg > 1 then (
-        F.pp_close_box fmt ();
-        F.pp_close_box fmt ();
-        F.pp_print_break fmt 0 0
-      )
+  | Isabelle -> ()
   | Lean ->
       (* We must add the "end" keyword to groups of mutually recursive functions *)
       if is_rec && List.length dg > 1 then (
@@ -207,15 +193,7 @@ let start_type_decl_group (ctx : extraction_ctx) (fmt : F.formatter)
     (is_rec : bool) (dg : Pure.type_decl list) =
   match backend () with
   | FStar | Coq -> ()
-  | Isabelle ->
-      (* Isabelle *)
-      if is_rec && List.length dg > 1 then (
-        F.pp_print_break fmt 0 0;
-        F.pp_open_vbox fmt 0;
-        F.pp_open_vbox fmt ctx.indent_incr;
-        F.pp_print_string fmt "datatype";
-        F.pp_print_space fmt ()
-      )
+  | Isabelle -> ()
   | Lean ->
       if is_rec && List.length dg > 1 then (
         F.pp_print_space fmt ();
@@ -247,13 +225,7 @@ let end_type_decl_group (fmt : F.formatter) (is_rec : bool)
       (* For aesthetic reasons, we print the Coq end group delimiter directly
          in {!extract_fun_decl}. *)
       ()
-  | Isabelle ->
-      (* Isabelle *)
-      if is_rec && List.length dg > 1 then (
-        F.pp_close_box fmt ();
-        F.pp_close_box fmt ();
-        F.pp_print_break fmt 0 0
-      )
+  | Isabelle -> ()
   | Lean ->
       (* We must add the "end" keyword to groups of mutually recursive functions *)
       if is_rec && List.length dg > 1 then (
@@ -339,7 +311,7 @@ let extract_ty_errors (fmt : F.formatter) : unit =
   | Isabelle -> F.pp_print_string fmt "undefined"
 
 let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
-    (no_params_tys : TypeDeclId.Set.t) (inside : bool) (ty : ty) : unit =
+    (no_params_tys : TypeDeclId.Set.t) ?(is_isabelle_datatype_def : bool = false) (inside : bool) (ty : ty) : unit =
   let extract_rec = extract_ty span ctx fmt no_params_tys in
   match ty with
   | TAdt (type_id, generics) -> (
@@ -424,7 +396,9 @@ let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
               extract_generic_args span ctx fmt no_params_tys ~explicit generics;
               if print_paren then F.pp_print_string fmt ")"
           | Isabelle ->
+              let use_quotes = is_isabelle_datatype_def && has_params in
               let print_paren = inside && has_params in
+              if use_quotes then F.pp_print_string fmt "\"";
               if print_paren then F.pp_print_string fmt "(";
               (* TODO: for now, only the opaque *functions* are extracted in the
                  opaque module. The opaque *types* are builtin. *)
@@ -469,11 +443,11 @@ let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
                     (* All the parameters of builtin types are explicit *)
                     (generics, None)
               in
-              (*F.pp_print_string fmt "[Debug]";*)
               extract_generic_args span ctx fmt no_params_tys ~explicit generics;
               F.pp_print_space fmt ();
               F.pp_print_string fmt (ctx_get_type (Some span) type_id ctx);
-              if print_paren then F.pp_print_string fmt ")"
+              if print_paren then F.pp_print_string fmt ")";
+              if use_quotes then F.pp_print_string fmt "\""
           | HOL4 ->
               let { types; const_generics; trait_refs } = generics in
               (* Const generics are not supported in HOL4 *)
@@ -827,18 +801,21 @@ let extract_type_decl_register_names (ctx : extraction_ctx) (def : type_decl) :
   ctx
 
 (** Print the variants *)
-let extract_type_decl_variant (span : Meta.span) (ctx : extraction_ctx)
+let extract_type_decl_variant (first : bool) (span : Meta.span) (ctx : extraction_ctx)
     (fmt : F.formatter) (type_decl_group : TypeDeclId.Set.t)
     (type_name : string) (type_params : string list) (cg_params : string list)
     (cons_name : string) (fields : field list) : unit =
-  F.pp_print_space fmt ();
+  F.pp_print_newline fmt ();
   (* variant box *)
   F.pp_open_hvbox fmt ctx.indent_incr;
   (* [| Cons :]
    * Note that we really don't want any break above so we print everything
    * at once. *)
   let opt_colon = if backend () <> HOL4 && backend () <> Isabelle then " :" else "" in (* Isabelle *)
-  F.pp_print_string fmt ("| " ^ cons_name ^ opt_colon);
+  if backend () = Isabelle && first then
+    F.pp_print_string fmt cons_name
+  else
+    F.pp_print_string fmt ("| " ^ cons_name ^ opt_colon);
   let print_field (fid : FieldId.id) (f : field) (ctx : extraction_ctx) :
       extraction_ctx =
     F.pp_print_space fmt ();
@@ -866,15 +843,9 @@ let extract_type_decl_variant (span : Meta.span) (ctx : extraction_ctx)
     in
     (* Print the field type *)
     let inside = backend () = HOL4 in
-    extract_ty span ctx fmt type_decl_group inside f.field_ty;
+    extract_ty span ctx fmt type_decl_group ~is_isabelle_datatype_def:(backend () = Isabelle) inside f.field_ty;
     (* Print the arrow [->] *)
-    if backend () <> HOL4 then 
-    if backend() = Isabelle then (* Isabelle use "of" in multiple fields *)
-      if List.length fields > 1 && FieldId.to_int fid < (List.length fields) - 1 then (
-          F.pp_print_space fmt ();
-          F.pp_print_string fmt "of";
-          F.pp_print_space fmt ())
-    else (
+    if backend () <> HOL4 && backend () <> Isabelle then (
       F.pp_print_space fmt ();
       extract_arrow fmt ());
     (* Close the field box *)
@@ -890,7 +861,7 @@ let extract_type_decl_variant (span : Meta.span) (ctx : extraction_ctx)
   (* Sanity check: HOL4 doesn't support const generics *)
   [%sanity_check] span (cg_params = [] || backend () <> HOL4);
   (* Print the final type *)
-  if backend () <> HOL4 then (
+  if backend () <> HOL4 && backend () <> Isabelle then (
     F.pp_print_space fmt ();
     F.pp_open_hovbox fmt 0;
     F.pp_print_string fmt type_name;
@@ -945,7 +916,8 @@ let extract_type_decl_enum_body (ctx : extraction_ctx) (fmt : F.formatter)
        id (in the case of Lean) *)
     let cons_name = ctx_compute_variant_name ctx def v in
     let fields = v.fields in
-    extract_type_decl_variant def.item_meta.span ctx fmt type_decl_group
+    let first = (VariantId.to_int _variant_id) = 0 in
+    extract_type_decl_variant first def.item_meta.span ctx fmt type_decl_group
       def_name type_params cg_params cons_name fields
   in
   (* Print the variants *)
@@ -1105,7 +1077,7 @@ let extract_type_decl_struct_body (ctx : extraction_ctx) (fmt : F.formatter)
         else ctx_get_struct def.item_meta.span (TAdtId def.def_id) ctx
       in
       let def_name = ctx_get_local_type def.item_meta.span def.def_id ctx in
-      extract_type_decl_variant def.item_meta.span ctx fmt type_decl_group
+      extract_type_decl_variant true def.item_meta.span ctx fmt type_decl_group
         def_name type_params cg_params cons_name fields)
   in
   ()
@@ -1189,7 +1161,7 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
     match backend () with
     | Isabelle -> 
         if explicit = Implicit then F.pp_print_string fmt "("  (* Isabelle has no implicit params *)
-        else F.pp_print_string fmt "('"
+        else ()
     | FStar -> 
         if explicit = Implicit && backend () <> FStar then F.pp_print_string fmt "{"
         else F.pp_print_string fmt "("
@@ -1200,8 +1172,8 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
   let right_bracket (explicit : explicit) =
     match backend () with
     | Isabelle -> 
-        if explicit = Implicit then F.pp_print_string fmt ")"  (* Isabelle 没有隐式参数 *)
-        else F.pp_print_string fmt "')"
+        if explicit = Implicit then F.pp_print_string fmt ")"  
+        else ()
     | FStar -> 
         if explicit = Implicit && backend () <> FStar then F.pp_print_string fmt "}"
         else F.pp_print_string fmt ")"
@@ -1211,7 +1183,7 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
   in
   let print_implicit_symbol (explicit : explicit) =
     match backend () with
-    | Isabelle -> ()  (* Isabelle 没有隐式参数符号 *)
+    | Isabelle -> ()
     | FStar -> 
         if explicit = Implicit then F.pp_print_string fmt "#"
         else ()
@@ -1407,7 +1379,16 @@ let extract_type_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
   (* > "type TYPE_NAME" *)
   let qualif = type_decl_kind_to_qualif def.item_meta.span kind type_kind in
   (match qualif with
-  | Some qualif -> F.pp_print_string fmt (qualif ^ " " ^ def_name)
+  | Some qualif -> 
+    if backend () = Isabelle then(
+      F.pp_print_string fmt (qualif);
+      extract_generic_params def.item_meta.span ctx_body fmt type_decl_group Item
+        ~use_forall def.generics (Some def.explicit_info) type_params cg_params
+        trait_clauses;
+      F.pp_print_string fmt (" " ^ def_name))
+    else
+      F.pp_print_string fmt (qualif ^ " " ^ def_name);
+
   | None -> F.pp_print_string fmt def_name);
   (* HOL4 doesn't support const generics, and type definitions in HOL4 don't
      support trait clauses *)
@@ -1416,9 +1397,10 @@ let extract_type_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
     "Constant generics and type definitions with trait clauses are not \
      supported yet when generating code for HOL4";
   (* Print the generic parameters *)
-  extract_generic_params def.item_meta.span ctx_body fmt type_decl_group Item
-    ~use_forall def.generics (Some def.explicit_info) type_params cg_params
-    trait_clauses;
+  if backend () <> Isabelle then
+    extract_generic_params def.item_meta.span ctx_body fmt type_decl_group Item
+      ~use_forall def.generics (Some def.explicit_info) type_params cg_params
+      trait_clauses;
   (* Print the "=" if we extract the body*)
   if extract_body then (
     F.pp_print_space fmt ();
@@ -1471,7 +1453,7 @@ let extract_type_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
   (* Close the box for the definition *)
   F.pp_close_box fmt ();
   (* Add breaks to insert new lines between definitions *)
-  if backend () <> HOL4 && backend () <> Isabelle || decl_is_not_last_from_group kind then
+  if backend () <> HOL4 || decl_is_not_last_from_group kind then
     F.pp_print_break fmt 0 0
 
 (** Extract an opaque type declaration for Isabelle *)
