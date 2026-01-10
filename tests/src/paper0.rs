@@ -19,8 +19,9 @@ definition test_incr :: " unit result" where
   "test_incr = (x ← ref_incr (0 :: i32) ; massert (x = (1 :: i32)))"
 */
 
+// choose is conflict with isabelle: it is a keyword
 // 2.2
-pub fn choose<'a, T>(b: bool, x: &'a mut T, y: &'a mut T) -> &'a mut T {
+pub fn choose1<'a, T>(b: bool, x: &'a mut T, y: &'a mut T) -> &'a mut T {
     if b {
         return x;
     } else {
@@ -31,7 +32,7 @@ pub fn choose<'a, T>(b: bool, x: &'a mut T, y: &'a mut T) -> &'a mut T {
 pub fn test_choose() {
     let mut x = 0;
     let mut y = 0;
-    let z = choose(true, &mut x, &mut y);
+    let z = choose1(true, &mut x, &mut y);
     *z = *z + 1;
     assert!(*z == 1);
     assert!(x == 1);
@@ -46,6 +47,12 @@ pub enum List<T> {
 }
 use List::Cons;
 use List::Nil;
+
+/* expected result
+datatype 't List_t =
+  List_Cons 't  "'t List_t" |
+  List_Nil
+*/ 
 
 pub fn list_nth_mut<'a, T>(l: &'a mut List<T>, i: u32) -> &'a mut T {
     match l {
@@ -84,7 +91,7 @@ pub fn test_nth() {
 pub fn call_choose(mut p: (u32, u32)) -> u32 {
     let px = &mut p.0;
     let py = &mut p.1;
-    let pz = choose(true, px, py);
+    let pz = choose1(true, px, py);
     *pz = *pz + 1;
     return p.0;
 }

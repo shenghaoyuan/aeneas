@@ -308,7 +308,11 @@ let rec extract_tpattern (not_print_name: bool) (span : Meta.span) (ctx : extrac
   in
   if with_type then (
     F.pp_print_space fmt ();
-    F.pp_print_string fmt ":";
+    let _ =
+      match backend () with 
+      | Isabelle -> F.pp_print_string fmt "::"
+      | _ -> F.pp_print_string fmt ":"
+    in
     F.pp_print_space fmt ();
     extract_ty span ctx fmt TypeDeclId.Set.empty false v.ty;
     F.pp_print_string fmt ")");
@@ -956,7 +960,11 @@ and extract_Lambda (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
   if inside then F.pp_print_string fmt "(";
   (* Print the lambda - note that there should always be at least one variable *)
   [%sanity_check] span (xl <> []);
-  F.pp_print_string fmt "fun";
+  let _ =
+    match backend () with
+    | Isabelle -> F.pp_print_string fmt "λ";
+    | _ -> F.pp_print_string fmt "fun";
+  in
   let with_type =
     match backend () with
     | Coq | Isabelle -> true
@@ -970,8 +978,12 @@ and extract_Lambda (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
       ctx xl
   in
   F.pp_print_space fmt ();
-  if backend () = Lean || backend () = Coq || backend() = Isabelle then F.pp_print_string fmt "=>"
-  else F.pp_print_string fmt "->";
+  let _ =
+    match backend () with
+    | Lean | Coq -> F.pp_print_string fmt "=>"
+    | Isabelle  -> F.pp_print_string fmt "."
+    | _ -> F.pp_print_string fmt "->"
+  in
   F.pp_print_space fmt ();
   (* Print the body *)
   extract_texpr span ctx fmt false e;
@@ -1051,7 +1063,6 @@ and extract_lets (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
         (* Check if we can ignore the [let] - it is possible for some backends,
            if the monadic expression evaluates to [()] *)
         let ignore_let =
-        F.pp_print_string fmt " emonadic ";
           monadic && is_dummy_pattern lv && ty_is_unit lv.ty
           && backend () = Lean
         in
