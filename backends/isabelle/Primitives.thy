@@ -34,6 +34,12 @@ fun bind :: "'a result ⇒ ('a ⇒ 'b result) ⇒ 'b result" (infixl ">>=" 55) w
   "bind (Fail e) f = Fail e"
 | "bind (Ok x) f = f x"
 
+syntax
+  "_do_bind" :: "[pttrn, 'a result, 'b result] ⇒ 'b result" 
+    ("(2_ ← _;// _)" [0, 0, 10] 10)
+translations
+  "_do_bind x m e" ⇌ "CONST bind m (λx. e)"
+
 (** Monadic assert *)
 definition massert :: "bool ⇒ unit result" where
   "massert b ≡ if b then return () else fail Failure"

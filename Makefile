@@ -85,6 +85,7 @@ isabelle:
 	./bin/aeneas tests/llbc/options_d.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./bin/aeneas tests/llbc/constants0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./bin/aeneas tests/llbc/scalars0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./bin/aeneas tests/llbc/paper0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 
 # TODO: using ppx (in aeneas-ppx) breaks this command
 .PHONY: doc
