@@ -217,32 +217,430 @@ definition scalar_neqb :: "'a::eq ⇒ 'a ⇒ bool" where "scalar_neqb = (≠)"
 definition scalar_eqb  :: "'a::order ⇒ 'a ⇒ bool" where "scalar_eqb = (=)"
 definition scalar_neqb :: "'a::order ⇒ 'a ⇒ bool" where "scalar_neqb = (≠)" 
 
-(* Concrete operator definitions *)
-definition i8_neg    :: "i8 ⇒ i8 result"    where "i8_neg = scalar_neg I8"
-definition i16_neg   :: "i16 ⇒ i16 result"   where "i16_neg = scalar_neg I16"
-(* ... and so on for all signed types ... *)
-definition isize_neg :: "isize ⇒ isize result" where "isize_neg = scalar_neg Isize"
+(* 取反操作 *)
+definition isize_neg :: "int ⇒ int result" where 
+  "isize_neg = scalar_neg Isize"
 
-definition i8_add    :: "i8 ⇒ i8 ⇒ i8 result"    where "i8_add = scalar_add I8"
-definition u32_add   :: "u32 ⇒ u32 ⇒ u32 result"   where "u32_add = scalar_add U32"
-(* ... and so on for all types and all ops (sub, mul, div, rem) ... *)
+definition i8_neg :: "int ⇒ int result" where 
+  "i8_neg = scalar_neg I8"
 
-(* For brevity, axiomating the rest of the concrete ops *)
-axiomatization
-  i8_div  :: "i8 ⇒ i8 ⇒ i8 result" and i8_rem  :: "i8 ⇒ i8 ⇒ i8 result" and
-  i16_add :: "i16 ⇒ i16 ⇒ i16 result" and i16_sub :: "i16 ⇒ i16 ⇒ i16 result" and
-  (* ... all other combinations ... *)
-  u128_mul :: "u128 ⇒ u128 ⇒ u128 result"
+definition i16_neg :: "int ⇒ int result" where 
+  "i16_neg = scalar_neg I16"
 
-axiomatization
-  i8_xor :: "i8 ⇒ i8 ⇒ i8 result" and i8_or :: "i8 ⇒ i8 ⇒ i8 result" and
-  (* ... all other bitwise combinations ... *)
-  u128_not :: "u128 ⇒ u128 result"
+definition i32_neg :: "int ⇒ int result" where 
+  "i32_neg = scalar_neg I32"
 
-axiomatization
-  i8_shl :: "i8 ⇒ i8 ⇒ i8 result" and u32_shr :: "u32 ⇒ u32 ⇒ u32 result"
-  (* ... all other shift combinations ... *)
-  (* Note: The second argument's type might need to be 'int' or 'u32' depending on Rust semantics *)
+definition i64_neg :: "int ⇒ int result" where 
+  "i64_neg = scalar_neg I64"
+
+definition i128_neg :: "int ⇒ int result" where 
+  "i128_neg = scalar_neg I128"
+
+(* 除法操作 *)
+definition isize_div :: "int ⇒ int ⇒ int result" where 
+  "isize_div = scalar_div Isize"
+
+definition i8_div :: "int ⇒ int ⇒ int result" where 
+  "i8_div = scalar_div I8"
+
+definition i16_div :: "int ⇒ int ⇒ int result" where 
+  "i16_div = scalar_div I16"
+
+definition i32_div :: "int ⇒ int ⇒ int result" where 
+  "i32_div = scalar_div I32"
+
+definition i64_div :: "int ⇒ int ⇒ int result" where 
+  "i64_div = scalar_div I64"
+
+definition i128_div :: "int ⇒ int ⇒ int result" where 
+  "i128_div = scalar_div I128"
+
+definition usize_div :: "int ⇒ int ⇒ int result" where 
+  "usize_div = scalar_div Usize"
+
+definition u8_div :: "int ⇒ int ⇒ int result" where 
+  "u8_div = scalar_div U8"
+
+definition u16_div :: "int ⇒ int ⇒ int result" where 
+  "u16_div = scalar_div U16"
+
+definition u32_div :: "int ⇒ int ⇒ int result" where 
+  "u32_div = scalar_div U32"
+
+definition u64_div :: "int ⇒ int ⇒ int result" where 
+  "u64_div = scalar_div U64"
+
+definition u128_div :: "int ⇒ int ⇒ int result" where 
+  "u128_div = scalar_div U128"
+
+(* 取余操作 *)
+definition isize_rem :: "int ⇒ int ⇒ int result" where 
+  "isize_rem = scalar_rem Isize"
+
+definition i8_rem :: "int ⇒ int ⇒ int result" where 
+  "i8_rem = scalar_rem I8"
+
+definition i16_rem :: "int ⇒ int ⇒ int result" where 
+  "i16_rem = scalar_rem I16"
+
+definition i32_rem :: "int ⇒ int ⇒ int result" where 
+  "i32_rem = scalar_rem I32"
+
+definition i64_rem :: "int ⇒ int ⇒ int result" where 
+  "i64_rem = scalar_rem I64"
+
+definition i128_rem :: "int ⇒ int ⇒ int result" where 
+  "i128_rem = scalar_rem I128"
+
+definition usize_rem :: "int ⇒ int ⇒ int result" where 
+  "usize_rem = scalar_rem Usize"
+
+definition u8_rem :: "int ⇒ int ⇒ int result" where 
+  "u8_rem = scalar_rem U8"
+
+definition u16_rem :: "int ⇒ int ⇒ int result" where 
+  "u16_rem = scalar_rem U16"
+
+definition u32_rem :: "int ⇒ int ⇒ int result" where 
+  "u32_rem = scalar_rem U32"
+
+definition u64_rem :: "int ⇒ int ⇒ int result" where 
+  "u64_rem = scalar_rem U64"
+
+definition u128_rem :: "int ⇒ int ⇒ int result" where 
+  "u128_rem = scalar_rem U128"
+
+(* 加法操作 - 使用已定义的 scalar_add *)
+definition isize_add :: "int ⇒ int ⇒ int result" where 
+  "isize_add = scalar_add Isize"
+
+definition i8_add :: "int ⇒ int ⇒ int result" where 
+  "i8_add = scalar_add I8"
+
+definition i16_add :: "int ⇒ int ⇒ int result" where 
+  "i16_add = scalar_add I16"
+
+definition i32_add :: "int ⇒ int ⇒ int result" where 
+  "i32_add = scalar_add I32"
+
+definition i64_add :: "int ⇒ int ⇒ int result" where 
+  "i64_add = scalar_add I64"
+
+definition i128_add :: "int ⇒ int ⇒ int result" where 
+  "i128_add = scalar_add I128"
+
+definition usize_add :: "int ⇒ int ⇒ int result" where 
+  "usize_add = scalar_add Usize"
+
+definition u8_add :: "int ⇒ int ⇒ int result" where 
+  "u8_add = scalar_add U8"
+
+definition u16_add :: "int ⇒ int ⇒ int result" where 
+  "u16_add = scalar_add U16"
+
+definition u32_add :: "int ⇒ int ⇒ int result" where 
+  "u32_add = scalar_add U32"
+
+definition u64_add :: "int ⇒ int ⇒ int result" where 
+  "u64_add = scalar_add U64"
+
+definition u128_add :: "int ⇒ int ⇒ int result" where 
+  "u128_add = scalar_add U128"
+
+(* 减法操作 *)
+definition isize_sub :: "int ⇒ int ⇒ int result" where 
+  "isize_sub = scalar_sub Isize"
+
+definition i8_sub :: "int ⇒ int ⇒ int result" where 
+  "i8_sub = scalar_sub I8"
+
+definition i16_sub :: "int ⇒ int ⇒ int result" where 
+  "i16_sub = scalar_sub I16"
+
+definition i32_sub :: "int ⇒ int ⇒ int result" where 
+  "i32_sub = scalar_sub I32"
+
+definition i64_sub :: "int ⇒ int ⇒ int result" where 
+  "i64_sub = scalar_sub I64"
+
+definition i128_sub :: "int ⇒ int ⇒ int result" where 
+  "i128_sub = scalar_sub I128"
+
+definition usize_sub :: "int ⇒ int ⇒ int result" where 
+  "usize_sub = scalar_sub Usize"
+
+definition u8_sub :: "int ⇒ int ⇒ int result" where 
+  "u8_sub = scalar_sub U8"
+
+definition u16_sub :: "int ⇒ int ⇒ int result" where 
+  "u16_sub = scalar_sub U16"
+
+definition u32_sub :: "int ⇒ int ⇒ int result" where 
+  "u32_sub = scalar_sub U32"
+
+definition u64_sub :: "int ⇒ int ⇒ int result" where 
+  "u64_sub = scalar_sub U64"
+
+definition u128_sub :: "int ⇒ int ⇒ int result" where 
+  "u128_sub = scalar_sub U128"
+
+(* 乘法操作 *)
+definition isize_mul :: "int ⇒ int ⇒ int result" where 
+  "isize_mul = scalar_mul Isize"
+
+definition i8_mul :: "int ⇒ int ⇒ int result" where 
+  "i8_mul = scalar_mul I8"
+
+definition i16_mul :: "int ⇒ int ⇒ int result" where 
+  "i16_mul = scalar_mul I16"
+
+definition i32_mul :: "int ⇒ int ⇒ int result" where 
+  "i32_mul = scalar_mul I32"
+
+definition i64_mul :: "int ⇒ int ⇒ int result" where 
+  "i64_mul = scalar_mul I64"
+
+definition i128_mul :: "int ⇒ int ⇒ int result" where 
+  "i128_mul = scalar_mul I128"
+
+definition usize_mul :: "int ⇒ int ⇒ int result" where 
+  "usize_mul = scalar_mul Usize"
+
+definition u8_mul :: "int ⇒ int ⇒ int result" where 
+  "u8_mul = scalar_mul U8"
+
+definition u16_mul :: "int ⇒ int ⇒ int result" where 
+  "u16_mul = scalar_mul U16"
+
+definition u32_mul :: "int ⇒ int ⇒ int result" where 
+  "u32_mul = scalar_mul U32"
+
+definition u64_mul :: "int ⇒ int ⇒ int result" where 
+  "u64_mul = scalar_mul U64"
+
+definition u128_mul :: "int ⇒ int ⇒ int result" where 
+  "u128_mul = scalar_mul U128"
+
+(* 异或操作 *)
+definition u8_xor :: "int ⇒ int ⇒ int result" where 
+  "u8_xor = scalar_xor U8"
+
+definition u16_xor :: "int ⇒ int ⇒ int result" where 
+  "u16_xor = scalar_xor U16"
+
+definition u32_xor :: "int ⇒ int ⇒ int result" where 
+  "u32_xor = scalar_xor U32"
+
+definition u64_xor :: "int ⇒ int ⇒ int result" where 
+  "u64_xor = scalar_xor U64"
+
+definition u128_xor :: "int ⇒ int ⇒ int result" where 
+  "u128_xor = scalar_xor U128"
+
+definition usize_xor :: "int ⇒ int ⇒ int result" where 
+  "usize_xor = scalar_xor Usize"
+
+definition i8_xor :: "int ⇒ int ⇒ int result" where 
+  "i8_xor = scalar_xor I8"
+
+definition i16_xor :: "int ⇒ int ⇒ int result" where 
+  "i16_xor = scalar_xor I16"
+
+definition i32_xor :: "int ⇒ int ⇒ int result" where 
+  "i32_xor = scalar_xor I32"
+
+definition i64_xor :: "int ⇒ int ⇒ int result" where 
+  "i64_xor = scalar_xor I64"
+
+definition i128_xor :: "int ⇒ int ⇒ int result" where 
+  "i128_xor = scalar_xor I128"
+
+definition isize_xor :: "int ⇒ int ⇒ int result" where 
+  "isize_xor = scalar_xor Isize"
+
+(* 或操作 *)
+definition u8_or :: "int ⇒ int ⇒ int result" where 
+  "u8_or = scalar_or U8"
+
+definition u16_or :: "int ⇒ int ⇒ int result" where 
+  "u16_or = scalar_or U16"
+
+definition u32_or :: "int ⇒ int ⇒ int result" where 
+  "u32_or = scalar_or U32"
+
+definition u64_or :: "int ⇒ int ⇒ int result" where 
+  "u64_or = scalar_or U64"
+
+definition u128_or :: "int ⇒ int ⇒ int result" where 
+  "u128_or = scalar_or U128"
+
+definition usize_or :: "int ⇒ int ⇒ int result" where 
+  "usize_or = scalar_or Usize"
+
+definition i8_or :: "int ⇒ int ⇒ int result" where 
+  "i8_or = scalar_or I8"
+
+definition i16_or :: "int ⇒ int ⇒ int result" where 
+  "i16_or = scalar_or I16"
+
+definition i32_or :: "int ⇒ int ⇒ int result" where 
+  "i32_or = scalar_or I32"
+
+definition i64_or :: "int ⇒ int ⇒ int result" where 
+  "i64_or = scalar_or I64"
+
+definition i128_or :: "int ⇒ int ⇒ int result" where 
+  "i128_or = scalar_or I128"
+
+definition isize_or :: "int ⇒ int ⇒ int result" where 
+  "isize_or = scalar_or Isize"
+
+(* 与操作 *)
+definition u8_and :: "int ⇒ int ⇒ int result" where 
+  "u8_and = scalar_and U8"
+
+definition u16_and :: "int ⇒ int ⇒ int result" where 
+  "u16_and = scalar_and U16"
+
+definition u32_and :: "int ⇒ int ⇒ int result" where 
+  "u32_and = scalar_and U32"
+
+definition u64_and :: "int ⇒ int ⇒ int result" where 
+  "u64_and = scalar_and U64"
+
+definition u128_and :: "int ⇒ int ⇒ int result" where 
+  "u128_and = scalar_and U128"
+
+definition usize_and :: "int ⇒ int ⇒ int result" where 
+  "usize_and = scalar_and Usize"
+
+definition i8_and :: "int ⇒ int ⇒ int result" where 
+  "i8_and = scalar_and I8"
+
+definition i16_and :: "int ⇒ int ⇒ int result" where 
+  "i16_and = scalar_and I16"
+
+definition i32_and :: "int ⇒ int ⇒ int result" where 
+  "i32_and = scalar_and I32"
+
+definition i64_and :: "int ⇒ int ⇒ int result" where 
+  "i64_and = scalar_and I64"
+
+definition i128_and :: "int ⇒ int ⇒ int result" where 
+  "i128_and = scalar_and I128"
+
+definition isize_and :: "int ⇒ int ⇒ int result" where 
+  "isize_and = scalar_and Isize"
+
+definition u8_shl :: "int ⇒ int ⇒ int result" where 
+  "u8_shl = scalar_shl U8 U8"
+
+definition u16_shl :: "int ⇒ int ⇒ int result" where 
+  "u16_shl = scalar_shl U16 U8"
+
+definition u32_shl :: "int ⇒ int ⇒ int result" where 
+  "u32_shl = scalar_shl U32 U8"
+
+definition u64_shl :: "int ⇒ int ⇒ int result" where 
+  "u64_shl = scalar_shl U64 U8"
+
+definition u128_shl :: "int ⇒ int ⇒ int result" where 
+  "u128_shl = scalar_shl U128 U8"
+
+definition usize_shl :: "int ⇒ int ⇒ int result" where 
+  "usize_shl = scalar_shl Usize U8"
+
+definition i8_shl :: "int ⇒ int ⇒ int result" where 
+  "i8_shl = scalar_shl I8 U8"
+
+definition i16_shl :: "int ⇒ int ⇒ int result" where 
+  "i16_shl = scalar_shl I16 U8"
+
+definition i32_shl :: "int ⇒ int ⇒ int result" where 
+  "i32_shl = scalar_shl I32 U8"
+
+definition i64_shl :: "int ⇒ int ⇒ int result" where 
+  "i64_shl = scalar_shl I64 U8"
+
+definition i128_shl :: "int ⇒ int ⇒ int result" where 
+  "i128_shl = scalar_shl I128 U8"
+
+definition isize_shl :: "int ⇒ int ⇒ int result" where 
+  "isize_shl = scalar_shl Isize U8"
+
+(* 右移操作 - 注意：这里需要两个类型参数 *)
+definition u8_shr :: "int ⇒ int ⇒ int result" where 
+  "u8_shr = scalar_shr U8 U8"
+
+definition u16_shr :: "int ⇒ int ⇒ int result" where 
+  "u16_shr = scalar_shr U16 U8"
+
+definition u32_shr :: "int ⇒ int ⇒ int result" where 
+  "u32_shr = scalar_shr U32 U8"
+
+definition u64_shr :: "int ⇒ int ⇒ int result" where 
+  "u64_shr = scalar_shr U64 U8"
+
+definition u128_shr :: "int ⇒ int ⇒ int result" where 
+  "u128_shr = scalar_shr U128 U8"
+
+definition usize_shr :: "int ⇒ int ⇒ int result" where 
+  "usize_shr = scalar_shr Usize U8"
+
+definition i8_shr :: "int ⇒ int ⇒ int result" where 
+  "i8_shr = scalar_shr I8 U8"
+
+definition i16_shr :: "int ⇒ int ⇒ int result" where 
+  "i16_shr = scalar_shr I16 U8"
+
+definition i32_shr :: "int ⇒ int ⇒ int result" where 
+  "i32_shr = scalar_shr I32 I8"
+
+definition i64_shr :: "int ⇒ int ⇒ int result" where 
+  "i64_shr = scalar_shr I64 U8"
+
+definition i128_shr :: "int ⇒ int ⇒ int result" where 
+  "i128_shr = scalar_shr I128 U8"
+
+definition isize_shr :: "int ⇒ int ⇒ int result" where 
+  "isize_shr = scalar_shr Isize U8"
+
+(* 非操作 *)
+definition u8_not :: "int ⇒ int result" where 
+  "u8_not = scalar_not U8"
+
+definition u16_not :: "int ⇒ int result" where 
+  "u16_not = scalar_not U16"
+
+definition u32_not :: "int ⇒ int result" where 
+  "u32_not = scalar_not U32"
+
+definition u64_not :: "int ⇒ int result" where 
+  "u64_not = scalar_not U64"
+
+definition u128_not :: "int ⇒ int result" where 
+  "u128_not = scalar_not U128"
+
+definition usize_not :: "int ⇒ int result" where 
+  "usize_not = scalar_not Usize"
+
+definition i8_not :: "int ⇒ int result" where 
+  "i8_not = scalar_not I8"
+
+definition i16_not :: "int ⇒ int result" where 
+  "i16_not = scalar_not I16"
+
+definition i32_not :: "int ⇒ int result" where 
+  "i32_not = scalar_not I32"
+
+definition i64_not :: "int ⇒ int result" where 
+  "i64_not = scalar_not I64"
+
+definition i128_not :: "int ⇒ int result" where 
+  "i128_not = scalar_not I128"
+
+definition isize_not :: "int ⇒ int result" where 
+  "isize_not = scalar_not Isize"
 
 (** Small utility *)
 definition usize_to_nat :: "usize ⇒ nat" where
@@ -525,4 +923,4 @@ definition core_slice_index_SliceIndexRangeUsizeSliceInst :: "'a ⇒ (usize core
 (* ... and so on for all trait impls ... *)
 (* This is a representative subset. *)
 
-endvvvvvvvvvv
+end
