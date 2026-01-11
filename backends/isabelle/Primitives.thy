@@ -181,6 +181,7 @@ definition scalar_rem :: "scalar_ty ⇒ int ⇒ int ⇒ int result" where
 definition scalar_neg :: "scalar_ty ⇒ int ⇒ int result" where
   "scalar_neg ty x ≡ mk_scalar ty (- x)"
 
+
 (* Axiomatized bitwise operations *)
 axiomatization scalar_xor :: "scalar_ty ⇒ int ⇒ int ⇒ int result"
 axiomatization scalar_or  :: "scalar_ty ⇒ int ⇒ int ⇒ int result"
@@ -647,6 +648,199 @@ definition i128_not :: "int ⇒ int result" where
 
 definition isize_not :: "int ⇒ int result" where 
   "isize_not = scalar_not Isize"
+
+
+
+
+definition u8_lt  :: "int ⇒ int ⇒ bool" where 
+  "u8_lt x y = (x < y)"
+
+definition u16_lt  :: "int ⇒ int ⇒ bool" where 
+  "u16_lt x y = (x < y)"
+
+definition u32_lt  :: "int ⇒ int ⇒ bool" where 
+  "u32_lt x y = (x < y)"
+
+definition u64_lt  :: "int ⇒ int ⇒ bool" where 
+  "u64_lt x y = (x < y)"
+
+definition u128_lt  :: "int ⇒ int ⇒ bool" where 
+  "u128_lt x y = (x < y)"
+
+definition usize_lt  :: "int ⇒ int ⇒ bool" where 
+  "usize_lt x y = (x < y)"
+
+definition i8_lt  :: "int ⇒ int ⇒ bool" where 
+  "i8_lt x y = (x < y)"
+
+definition i16_lt  :: "int ⇒ int ⇒ bool" where 
+  "i16_lt x y = (x < y)"
+
+definition i32_lt  :: "int ⇒ int ⇒ bool" where 
+  "i32_lt x y = (x < y)"
+
+definition i64_lt  :: "int ⇒ int ⇒ bool" where 
+  "i64_lt x y = (x < y)"
+
+definition i128_lt  :: "int ⇒ int ⇒ bool" where 
+  "i128_lt x y = (x < y)"
+
+definition isize_lt  :: "int ⇒ int ⇒ bool" where 
+  "isize_lt x y = (x < y)"
+
+
+
+
+definition u8_le  :: "int ⇒ int ⇒ bool" where 
+  "u8_le x y = (x ≤ y)"
+
+definition u16_le  :: "int ⇒ int ⇒ bool" where 
+  "u16_le x y = (x ≤ y)"
+
+definition u32_le  :: "int ⇒ int ⇒ bool" where 
+  "u32_le x y = (x ≤ y)"
+
+definition u64_le  :: "int ⇒ int ⇒ bool" where 
+  "u64_le x y = (x ≤ y)"
+
+definition u128_le  :: "int ⇒ int ⇒ bool" where 
+  "u128_le x y = (x ≤ y)"
+
+definition usize_le  :: "int ⇒ int ⇒ bool" where 
+  "usize_le x y = (x ≤ y)"
+
+definition i8_le  :: "int ⇒ int ⇒ bool" where 
+  "i8_le x y = (x ≤ y)"
+
+definition i16_le  :: "int ⇒ int ⇒ bool" where 
+  "i16_le x y = (x ≤ y)"
+
+definition i32_le  :: "int ⇒ int ⇒ bool" where 
+  "i32_le x y = (x ≤ y)"
+
+definition i64_le  :: "int ⇒ int ⇒ bool" where 
+  "i64_le x y = (x ≤ y)"
+
+definition i128_le  :: "int ⇒ int ⇒ bool" where 
+  "i128_le x y = (x ≤ y)"
+
+definition isize_le  :: "int ⇒ int ⇒ bool" where 
+  "isize_le x y = (x ≤ y)"
+
+
+
+definition u8_gt  :: "int ⇒ int ⇒ bool" where 
+  "u8_gt x y = (y < x)"
+
+definition u16_gt  :: "int ⇒ int ⇒ bool" where 
+  "u16_gt x y = (y < x)"
+
+definition u32_gt  :: "int ⇒ int ⇒ bool" where 
+  "u32_gt x y = (y < x)"
+
+definition u64_gt  :: "int ⇒ int ⇒ bool" where 
+  "u64_gt x y = (y < x)"
+
+definition u128_gt  :: "int ⇒ int ⇒ bool" where 
+  "u128_gt x y = (y < x)"
+
+definition usize_gt  :: "int ⇒ int ⇒ bool" where 
+  "usize_gt x y = (y < x)"
+
+definition i8_gt  :: "int ⇒ int ⇒ bool" where 
+  "i8_gt x y = (y < x)"
+
+definition i16_gt  :: "int ⇒ int ⇒ bool" where 
+  "i16_gt x y = (y < x)"
+
+definition i32_gt  :: "int ⇒ int ⇒ bool" where 
+  "i32_gt x y = (y < x)"
+
+definition i64_gt  :: "int ⇒ int ⇒ bool" where 
+  "i64_gt x y = (y < x)"
+
+definition i128_gt  :: "int ⇒ int ⇒ bool" where 
+  "i128_gt x y = (y < x)"
+
+definition isize_gt  :: "int ⇒ int ⇒ bool" where 
+  "isize_gt x y = (y < x)"
+
+
+
+
+definition u8_ge  :: "int ⇒ int ⇒ bool" where 
+  "u8_ge x y = (y ≤ x)"
+
+definition u16_ge  :: "int ⇒ int ⇒ bool" where 
+  "u16_ge x y = (y ≤ x)"
+
+definition u32_ge  :: "int ⇒ int ⇒ bool" where 
+  "u32_ge x y = (y ≤ x)"
+
+definition u64_ge  :: "int ⇒ int ⇒ bool" where 
+  "u64_ge x y = (y ≤ x)"
+
+definition u128_ge  :: "int ⇒ int ⇒ bool" where 
+  "u128_ge x y = (y ≤ x)"
+
+definition usize_ge  :: "int ⇒ int ⇒ bool" where 
+  "usize_ge x y = (y ≤ x)"
+
+definition i8_ge  :: "int ⇒ int ⇒ bool" where 
+  "i8_ge x y = (y ≤ x)"
+
+definition i16_ge  :: "int ⇒ int ⇒ bool" where 
+  "i16_ge x y = (y ≤ x)"
+
+definition i32_ge  :: "int ⇒ int ⇒ bool" where 
+  "i32_ge x y = (y ≤ x)"
+
+definition i64_ge  :: "int ⇒ int ⇒ bool" where 
+  "i64_ge x y = (y ≤ x)"
+
+definition i128_ge  :: "int ⇒ int ⇒ bool" where 
+  "i128_ge x y = (y ≤ x)"
+
+definition isize_ge  :: "int ⇒ int ⇒ bool" where 
+  "isize_ge x y = (y ≤ x)"
+
+
+
+definition u8_eq  :: "int ⇒ int ⇒ bool" where 
+  "u8_eq x y = (x = y)"
+
+definition u16_eq  :: "int ⇒ int ⇒ bool" where 
+  "u16_eq x y = (x = y)"
+
+definition u32_eq  :: "int ⇒ int ⇒ bool" where 
+  "u32_eq x y = (x = y)"
+
+definition u64_eq  :: "int ⇒ int ⇒ bool" where 
+  "u64_eq x y = (x = y)"
+
+definition u128_eq  :: "int ⇒ int ⇒ bool" where 
+  "u128_eq x y = (x = y)"
+
+definition usize_eq  :: "int ⇒ int ⇒ bool" where 
+  "usize_eq x y = (x = y)"
+
+definition i8_eq  :: "int ⇒ int ⇒ bool" where 
+  "i8_eq x y = (x = y)"
+
+definition i16_eq  :: "int ⇒ int ⇒ bool" where 
+  "i16_eq x y = (x = y)"
+
+definition i32_eq  :: "int ⇒ int ⇒ bool" where 
+  "i32_eq x y = (x = y)"
+
+definition i64_eq  :: "int ⇒ int ⇒ bool" where 
+  "i64_eq x y = (x = y)"
+
+definition i128_eq  :: "int ⇒ int ⇒ bool" where 
+  "i128_eq x y = (x = y)"
+
+definition isize_eq  :: "int ⇒ int ⇒ bool" where 
+  "isize_eq x y = (x = y)"
 
 (** Small utility *)
 definition usize_to_nat :: "usize ⇒ nat" where

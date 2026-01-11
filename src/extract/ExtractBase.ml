@@ -1136,7 +1136,16 @@ let builtin_struct_constructors () : (builtin_ty * string) list =
 
 let builtin_variants () : (builtin_ty * VariantId.id * string) list =
   match backend () with
-  | FStar | Isabelle ->
+  | FStar ->
+      [
+        (TResult, result_ok_id, "Ok");
+        (TResult, result_fail_id, "Fail");
+        (TError, error_failure_id, "Failure");
+        (TError, error_out_of_fuel_id, "OutOfFuel");
+        (* No Fuel::Zero on purpose *)
+        (* No Fuel::Succ on purpose *)
+      ] 
+  | Isabelle ->
       [
         (TResult, result_ok_id, "Ok");
         (TResult, result_fail_id, "Fail");
