@@ -2893,6 +2893,7 @@ let extract_trait_item (ctx : extraction_ctx) (fmt : F.formatter)
   ty ();
   (match backend () with
   | Lean | Isabelle -> ()
+  (*| Isabelle -> if is_last = false then F.pp_print_string fmt "," (* for record type: add `,` to each field end, *)*)
   | _ -> F.pp_print_string fmt ";");
   F.pp_close_box fmt ()
 
@@ -2980,10 +2981,12 @@ let extract_trait_decl_method_items_aux (ctx : extraction_ctx)
     let ({ inputs; output; _ } : fun_sig) = signature in
     let inputs = List.map (ty_substitute subst) inputs in
     let output = ty_substitute subst output in
-    extract_fun_input_parameters_types span ctx fmt inputs;
-    extract_ty span ctx fmt TypeDeclId.Set.empty false output
+    let _ = if backend () <> Isabelle then () else F.pp_print_string fmt "\"" in (* the "" before the first input *)
+      extract_fun_input_parameters_types span ctx fmt inputs;
+      extract_ty span ctx fmt TypeDeclId.Set.empty false output
   in
-  extract_trait_decl_item ctx fmt fun_name ty
+    extract_trait_decl_item ctx fmt fun_name ty;
+    if backend () <> Isabelle then () else F.pp_print_string fmt "\""  (* the "" after the last input *)
 
 let extract_trait_decl_method_items (ctx : extraction_ctx) (fmt : F.formatter)
     (decl : trait_decl) (item_name : string) (fn : fun_decl_ref binder) : unit =
@@ -3033,18 +3036,28 @@ let extract_trait_decl (ctx : extraction_ctx) (fmt : F.formatter)
     F.pp_print_space fmt ());
   F.pp_print_string fmt qualif;
   F.pp_print_space fmt ();
-  F.pp_print_string fmt decl_name;
   (* Print the generics *)
   let generics = decl.generics in
   (* Add the type and const generic params - note that we need those bindings only for the
-   * body translation (they are not top-level) *)
+  * body translation (they are not top-level) *)
   let ctx, type_params, cg_params, trait_clauses =
     ctx_add_generic_params decl.item_meta.span decl.item_meta.name Item
       decl.llbc_generics generics ctx
   in
-  extract_generic_params decl.item_meta.span ctx fmt TypeDeclId.Set.empty Item
-    generics (Some decl.explicit_info) type_params cg_params trait_clauses;
-
+  let _ = 
+    match backend () with
+    | Isabelle -> (*For isabelle the `type` of record is before `name` *)
+      extract_generic_params decl.item_meta.span ctx fmt TypeDeclId.Set.empty Item
+        generics (Some decl.explicit_info) type_params cg_params trait_clauses;
+      F.pp_print_space fmt ();
+      F.pp_print_string fmt decl_name;
+    | _ ->
+      F.pp_print_string fmt decl_name;
+      F.pp_print_space fmt ();
+      extract_generic_params decl.item_meta.span ctx fmt TypeDeclId.Set.empty Item
+        generics (Some decl.explicit_info) type_params cg_params trait_clauses;
+    in
+  
   F.pp_print_space fmt ();
   if is_empty && backend () = FStar then (
     F.pp_print_string fmt "= unit";
@@ -3337,6 +3350,7 @@ let extract_trait_impl (ctx : extraction_ctx) (fmt : F.formatter)
     ctx_add_generic_params impl.item_meta.span impl.item_meta.name Item
       impl.llbc_generics impl.generics ctx
   in
+  if backend () <> Isabelle then (* TODO: here we just ignore the generic type for Isabelle backend *)
   extract_generic_params impl.item_meta.span ctx fmt TypeDeclId.Set.empty Item
     impl.generics (Some impl.explicit_info) type_params cg_params trait_clauses;
 
@@ -3344,8 +3358,10 @@ let extract_trait_impl (ctx : extraction_ctx) (fmt : F.formatter)
   F.pp_print_space fmt ();
   F.pp_print_string fmt (match backend () with Isabelle -> "::" | _ -> ":");
   F.pp_print_space fmt ();
+  F.pp_print_string fmt (match backend () with Isabelle -> "\"" | _ -> "");
   extract_trait_decl_ref impl.item_meta.span ctx fmt TypeDeclId.Set.empty false
     impl.impl_trait;
+  F.pp_print_string fmt (match backend () with Isabelle -> "\"" | _ -> "");
 
   let is_empty = trait_impl_is_empty impl in
 
@@ -3438,11 +3454,26 @@ let extract_trait_impl (ctx : extraction_ctx) (fmt : F.formatter)
       (List.combine trait_decl.parent_clauses impl.parent_trait_refs);
 
     (* The methods *)
-    List.iter
-      (fun (name, bound_fn) ->
-        extract_trait_impl_method_items ctx fmt impl name bound_fn)
-      impl.methods;
-
+    let _ = 
+      match backend () with
+      | Isabelle ->
+        let rec impl_acc f g l = 
+          match l with 
+          | [] -> ()
+          | [x] -> f x
+          | x :: xl -> f x; g ","; impl_acc f g xl
+        in
+        impl_acc
+          (fun (name, bound_fn) ->
+            extract_trait_impl_method_items ctx fmt impl name bound_fn;)
+          (F.pp_print_string fmt)
+          impl.methods;
+      | _ ->
+        List.iter
+          (fun (name, bound_fn) ->
+            extract_trait_impl_method_items ctx fmt impl name bound_fn)
+          impl.methods;
+        in
     (* Close the outer boxes for the definition, as well as the brackets *)
     F.pp_close_box fmt ();
     if backend () = Coq then (

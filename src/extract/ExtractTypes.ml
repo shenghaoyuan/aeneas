@@ -532,7 +532,6 @@ and extract_trait_decl_ref (span : Meta.span) (ctx : extraction_ctx)
   let use_brackets = tr.decl_generics <> empty_generic_args && inside in
   let name = ctx_get_trait_decl span tr.trait_decl_id ctx in
   if use_brackets then F.pp_print_string fmt "(";
-  F.pp_print_string fmt name;
   (* Lookup the information about the implicit/explicit parameters *)
   let explicit =
     match TraitDeclId.Map.find_opt tr.trait_decl_id ctx.trans_trait_decls with
@@ -542,8 +541,18 @@ and extract_trait_decl_ref (span : Meta.span) (ctx : extraction_ctx)
   (* There is something subtle here: the trait obligations for the implemented
      trait are put inside the parent clauses, so we must ignore them here *)
   let generics = { tr.decl_generics with trait_refs = [] } in
-  extract_generic_args span ctx fmt no_params_tys ~explicit generics;
-  if use_brackets then F.pp_print_string fmt ")"
+  let _ =
+    match backend () with
+    | Isabelle ->
+      extract_generic_args span ctx fmt no_params_tys ~explicit generics;
+      F.pp_print_space fmt ();
+      F.pp_print_string fmt name
+    | _ ->
+      F.pp_print_string fmt name;
+      F.pp_print_space fmt ();
+      extract_generic_args span ctx fmt no_params_tys ~explicit generics
+    in
+      if use_brackets then F.pp_print_string fmt ")"
 
 and extract_generic_args (span : Meta.span) (ctx : extraction_ctx)
     (fmt : F.formatter) (no_params_tys : TypeDeclId.Set.t)
