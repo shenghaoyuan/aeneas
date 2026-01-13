@@ -1230,7 +1230,7 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
               type_params;
             if use_arrows then (
               F.pp_print_space fmt ();
-              F.pp_print_string fmt "⇒"))
+              extract_arrow fmt () ))
       else(
         (* Print the type parameters *)
         if type_params <> [] then (

@@ -1545,7 +1545,7 @@ let extract_fun_parameters (space : bool ref) (ctx : extraction_ctx)
                 extract_ty def.item_meta.span ctx fmt TypeDeclId.Set.empty false
                   lv.ty;
                 F.pp_print_space fmt ();
-                F.pp_print_string fmt "⇒";
+                extract_arrow fmt ();
                 (* Close the box for the input parameters *)
                 F.pp_close_box fmt ();
                 ctx)

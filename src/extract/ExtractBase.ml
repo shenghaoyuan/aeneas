@@ -456,7 +456,7 @@ let str_name () = if backend () = Lean then "String" else "string"
 let int_name (int_ty : integer_type) : string =
   let isize, usize, i_format, u_format =
     match backend () with
-    | FStar | Coq | HOL4 | Isabelle->
+    | FStar | Coq | HOL4 | Isabelle ->
         ("isize", "usize", format_of_string "i%d", format_of_string "u%d")
     | Lean -> ("Isize", "Usize", format_of_string "I%d", format_of_string "U%d")
   in
@@ -477,7 +477,7 @@ let int_name (int_ty : integer_type) : string =
 let float_name (float_ty : float_type) : string =
   let format =
     match backend () with
-    | FStar | Coq | HOL4 | Isabelle-> format_of_string "f%d"
+    | FStar | Coq | HOL4 | Isabelle -> format_of_string "f%d"
     | Lean -> format_of_string "F%d"
   in
   match float_ty with
