@@ -86,12 +86,19 @@ etest: build-dev isabelle
 isabelle: 
 	rm -f ./tests/isabelle/*.thy
 	cp ./backends/isabelle/Primitives.thy ./tests/isabelle
+	./charon/bin/charon rustc --dest-file ./tests/llbc/options_d.llbc --preset=aeneas -- tests/src/options_d.rs --crate-name=options_d --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/options_d.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/constants0.llbc --preset=aeneas -- tests/src/constants0.rs --crate-name=constants0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/constants0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/scalars0.llbc --preset=aeneas -- tests/src/scalars0.rs --crate-name=scalars0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/scalars0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/paper0.llbc --preset=aeneas -- tests/src/paper0.rs --crate-name=paper0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/paper0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/demo0.llbc --preset=aeneas -- tests/src/demo0.rs --crate-name=demo0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/demo0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/bitwise0.llbc --preset=aeneas -- tests/src/bitwise0.rs --crate-name=bitwise0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/bitwise0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/traits0.llbc --preset=aeneas -- tests/src/traits0.rs --crate-name=traits0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/traits0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 
 # TODO: using ppx (in aeneas-ppx) breaks this command
