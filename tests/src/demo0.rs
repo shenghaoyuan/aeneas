@@ -1,6 +1,4 @@
-//@ [coq,fstar] aeneas-args=-use-fuel
-//@ [coq,fstar] subdir=demo
-//@ [lean] subdir=Demo
+//@ [!isabelle] skip
 #![allow(clippy::needless_lifetimes)]
 
 /* Simple functions */

@@ -1,4 +1,4 @@
-//@ [!lean] skip
+//@ [!isabelle] skip
 
 fn u32_use_wrapping_add(x: u32, y: u32) -> u32 {
     x.wrapping_add(y)

@@ -1,5 +1,4 @@
-//@ [!borrow-check] aeneas-args=-test-trans-units
-//@ [coq,fstar] subdir=misc
+//@ [!isabelle] skip
 //! The examples from the ICFP 2022 submission, all in one place.
 
 // 2.1

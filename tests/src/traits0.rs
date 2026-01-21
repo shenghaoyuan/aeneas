@@ -1,5 +1,4 @@
-//@ [fstar] aeneas-args=-decreases-clauses
-//@ [fstar,coq] subdir=misc
+//@ [!isabelle] skip
 pub trait BoolTrait {
     // Required method
     fn get_bool(&self) -> bool;

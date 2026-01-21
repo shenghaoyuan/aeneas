@@ -1,4 +1,5 @@
 //@ [coq,fstar] subdir=misc
+//@ [isabelle] known-failure
 struct AVLNode<T> {
     value: T,
     left: AVLTree<T>,

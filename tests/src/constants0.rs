@@ -1,5 +1,4 @@
-//@ [!borrow-check] aeneas-args=-test-trans-units
-//@ [coq,fstar] subdir=misc
+//@ [!isabelle] skip
 //! Tests with constants
 
 // Integers

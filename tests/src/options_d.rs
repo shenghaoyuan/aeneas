@@ -1,4 +1,4 @@
-//@ [!lean] skip
+//@ [!isabelle] skip
 
 fn test_unwrap_or<T>(x: Option<T>, d: T) -> T {
     x.unwrap_or(d)

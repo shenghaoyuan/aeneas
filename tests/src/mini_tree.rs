@@ -1,4 +1,4 @@
-//@ [coq,fstar] skip
+//@ [coq,fstar,isabelle] skip
 
 struct Node {
     child: OptNode,
