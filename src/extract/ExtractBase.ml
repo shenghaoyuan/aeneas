@@ -1090,6 +1090,35 @@ let keywords () =
   in
   List.concat [ named_unops; named_binops; misc ]
 
+(** A list of Isabelle standard functions*)
+let isabelle_standard_library_names =
+  [
+    (* List ops *)
+    "hd"; "tl"; "last"; "butlast"; "rev"; "length"; "size"; "set"; 
+    "map"; "filter"; "fold"; "foldr"; "foldl"; "concat"; "zip"; 
+    "replicate"; "take"; "drop"; "distinct"; "remdups"; "member";
+
+    (* Set ops *)
+    "insert"; "subset"; "psubset"; "union"; "inter"; "card"; 
+    "image"; "Ball"; "Bex"; "Collect";
+
+    (* Option *)
+    "None"; "Some"; "the"; "is_none"; "is_some";
+
+    (* Product & Sum *)
+    "fst"; "snd"; "curry"; "uncurry"; "Inl"; "Inr";
+
+    (* Map ('a ~=> 'b) *)
+    "dom"; "ran"; "map_of"; "empty";
+
+    (* Arithmetic & Order *)
+    "min"; "max"; "abs"; "sgn"; "gcd"; "lcm"; "div"; "mod";
+
+    (* Combinators & Misc *)
+    "id"; "comp"; "undefined"; "default"; "True"; "False"; "not"; 
+    "choose"; "range"; "univ"
+  ]
+
 let builtin_adts () : (builtin_ty * string) list =
   let state =
     if !use_state then
@@ -1685,6 +1714,12 @@ let ctx_compute_fun_name (meta : T.item_meta) (ctx : extraction_ctx)
   let fname = ctx_compute_fun_name_no_suffix meta ctx fname in
   (* Compute the suffix *)
   let suffix = default_fun_suffix num_loops loop_id in
+  let fname = 
+    if List.mem fname isabelle_standard_library_names && backend () = Isabelle then
+      fname ^ "'"
+    else
+      fname
+  in
   (* Concatenate *)
   fname ^ suffix
 
@@ -1948,7 +1983,9 @@ let ctx_compute_var_basename (span : Meta.span) (ctx : extraction_ctx)
       (* This should be a no-op *)
       match Config.backend () with
       | Lean -> basename
-      | FStar | Coq | HOL4 | Isabelle -> to_snake_case basename)
+      | FStar | Coq | HOL4 -> to_snake_case basename
+      | Isabelle -> if List.mem basename isabelle_standard_library_names then (to_snake_case basename) ^ "'" 
+      else to_snake_case basename)
   | None -> (
       (* No basename: we use the first letter of the type *)
       match ty with

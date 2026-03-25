@@ -311,7 +311,7 @@ let extract_ty_errors (fmt : F.formatter) : unit =
   | Isabelle -> F.pp_print_string fmt "undefined"
 
 let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
-    (no_params_tys : TypeDeclId.Set.t) ?(is_isabelle_datatype_def : bool = false) (inside : bool) (ty : ty) : unit =
+    (no_params_tys : TypeDeclId.Set.t) (inside : bool) (ty : ty) : unit =
   let extract_rec = extract_ty span ctx fmt no_params_tys in
   match ty with
   | TAdt (type_id, generics) -> (
@@ -396,9 +396,7 @@ let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
               extract_generic_args span ctx fmt no_params_tys ~explicit generics;
               if print_paren then F.pp_print_string fmt ")"
           | Isabelle ->
-              let use_quotes = is_isabelle_datatype_def && has_params in
               let print_paren = inside && has_params in
-              if use_quotes then F.pp_print_string fmt "\"";
               if print_paren then F.pp_print_string fmt "(";
               (* TODO: for now, only the opaque *functions* are extracted in the
                  opaque module. The opaque *types* are builtin. *)
@@ -447,7 +445,6 @@ let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
               F.pp_print_space fmt ();
               F.pp_print_string fmt (ctx_get_type (Some span) type_id ctx);
               if print_paren then F.pp_print_string fmt ")";
-              if use_quotes then F.pp_print_string fmt "\""
           | HOL4 ->
               let { types; const_generics; trait_refs } = generics in
               (* Const generics are not supported in HOL4 *)
@@ -814,17 +811,30 @@ let extract_type_decl_variant (first : bool) (span : Meta.span) (ctx : extractio
     (fmt : F.formatter) (type_decl_group : TypeDeclId.Set.t)
     (type_name : string) (type_params : string list) (cg_params : string list)
     (cons_name : string) (fields : field list) : unit =
-  F.pp_print_newline fmt ();
-  (* variant box *)
-  F.pp_open_hvbox fmt ctx.indent_incr;
+
   (* [| Cons :]
    * Note that we really don't want any break above so we print everything
    * at once. *)
   let opt_colon = if backend () <> HOL4 && backend () <> Isabelle then " :" else "" in (* Isabelle *)
-  if backend () = Isabelle && first then
-    F.pp_print_string fmt cons_name
-  else
-    F.pp_print_string fmt ("| " ^ cons_name ^ opt_colon);
+  if backend () = Isabelle then(
+    if first then(
+      F.pp_print_newline fmt ();
+      F.pp_print_string fmt "    ";
+      (* variant box *)
+      F.pp_open_hvbox fmt ctx.indent_incr;
+      F.pp_print_string fmt cons_name;)
+    else(
+      F.pp_print_string fmt " |";
+      F.pp_force_newline fmt ();
+      F.pp_print_string fmt "    ";
+      (* variant box *)
+      F.pp_open_hvbox fmt ctx.indent_incr;
+      F.pp_print_string fmt cons_name))
+  else(
+    F.pp_print_newline fmt ();
+    (* variant box *)
+    F.pp_open_hvbox fmt ctx.indent_incr;
+    F.pp_print_string fmt ("| " ^ cons_name ^ opt_colon));
   let print_field (fid : FieldId.id) (f : field) (ctx : extraction_ctx) :
       extraction_ctx =
     F.pp_print_space fmt ();
@@ -850,9 +860,13 @@ let extract_type_decl_variant (first : bool) (span : Meta.span) (ctx : extractio
               ctx)
       | Coq | Lean | HOL4 | Isabelle -> ctx
     in
+    if backend () = Isabelle then
+      F.pp_print_string fmt "\"";
     (* Print the field type *)
     let inside = backend () = HOL4 in
-    extract_ty span ctx fmt type_decl_group ~is_isabelle_datatype_def:(backend () = Isabelle) inside f.field_ty;
+    extract_ty span ctx fmt type_decl_group inside f.field_ty;
+    if backend () = Isabelle then
+      F.pp_print_string fmt "\"";
     (* Print the arrow [->] *)
     if backend () <> HOL4 && backend () <> Isabelle then (
       F.pp_print_space fmt ();
@@ -1169,8 +1183,7 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
   let left_bracket (explicit : explicit) =
     match backend () with
     | Isabelle -> 
-        if explicit = Implicit then F.pp_print_string fmt "("  (* Isabelle has no implicit params *)
-        else ()
+        F.pp_print_string fmt "("  (* Isabelle has no implicit params *)
     | FStar -> 
         if explicit = Implicit && backend () <> FStar then F.pp_print_string fmt "{"
         else F.pp_print_string fmt "("
@@ -1181,8 +1194,7 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
   let right_bracket (explicit : explicit) =
     match backend () with
     | Isabelle -> 
-        if explicit = Implicit then F.pp_print_string fmt ")"  
-        else ()
+        F.pp_print_string fmt ")"  
     | FStar -> 
         if explicit = Implicit && backend () <> FStar then F.pp_print_string fmt "}"
         else F.pp_print_string fmt ")"
