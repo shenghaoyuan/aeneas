@@ -86,7 +86,7 @@ let extract_literal (span : Meta.span) (fmt : F.formatter) (is_pattern : bool)
           if inside then F.pp_print_string fmt ")"
         | Isabelle ->  (* Isabelle *)
           F.pp_print_string fmt "(CHR ";
-          F.pp_print_string fmt ("''" ^ (string_of_int (Char.code c)) ^ "''");
+          F.pp_print_string fmt (string_of_int (Char.code c));
           F.pp_print_string fmt ")"
     )
   | VChar _ | VFloat _ | VStr _ | VByteStr _ ->
@@ -1513,7 +1513,7 @@ let extract_type_decl_isabelle_opaque (ctx : extraction_ctx) (fmt : F.formatter)
   F.pp_print_string fmt "type ";
   F.pp_print_string fmt def_name;
   (* add type params *)
-  let ctx_body, type_params, cg_params, trait_clauses =
+  let _(*ctx_body*), type_params, _(*cg_params*), _(*trait_clauses*) =
     ctx_add_generic_params def.item_meta.span def.item_meta.name Item
       def.llbc_generics def.generics ctx
   in
