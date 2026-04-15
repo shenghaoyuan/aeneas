@@ -2064,7 +2064,7 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
               F.pp_close_box fmt ();
             ) body.inputs
         );
-        F.pp_print_space fmt ();
+        (*F.pp_print_space fmt ();*)
         F.pp_print_string fmt "= (";
         F.pp_force_newline fmt ();
         (* F.pp_print_space fmt (); *)
@@ -2073,7 +2073,16 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
         extract_texpr def.item_meta.span ctx_body fmt false
           (Option.get def.body).body
       in
-      if backend () = Isabelle then (F.pp_force_newline fmt (); F.pp_print_string fmt ")\"");
+      if backend () = Isabelle then(
+        F.pp_force_newline fmt ();
+        F.pp_print_string fmt ")\"";
+        (match qualif with
+        | Some "function" -> (
+          F.pp_force_newline fmt ();
+          F.pp_print_string fmt "sorry")
+        | _ -> ()
+        );
+      );
       F.pp_close_box fmt ()
     in
     (* Close the box for the body *)

@@ -1037,6 +1037,10 @@ let extract_type_decl_struct_body (ctx : extraction_ctx) (fmt : F.formatter)
       (* If the definition is recursive, we may need to extract it as an inductive
          (instead of a record). We start with the "normal" case: we extract it
          as a record. *)
+    else if backend () = Isabelle && fields = [] then (
+      F.pp_print_space fmt ();
+      F.pp_print_string fmt (unit_name())
+    )
     else if (not is_rec) || (backend () <> Coq && backend () <> Lean && backend () <> Isabelle) then (
       if backend () <> Lean && backend () <> Isabelle then F.pp_print_space fmt ();
       (* If Coq: print the constructor name *)
@@ -1060,11 +1064,21 @@ let extract_type_decl_struct_body (ctx : extraction_ctx) (fmt : F.formatter)
         let field_name =
           ctx_get_field def.item_meta.span (TAdtId def.def_id) field_id ctx
         in
-        (* Open a box for the field *)
-        F.pp_open_box fmt ctx.indent_incr;
-        F.pp_print_string fmt field_name;
+        if backend () = Isabelle then (
+          let field_name = StringUtils.capitalize_first_letter
+          (ctx_compute_type_name_no_suffix ctx def.item_meta def.item_meta.name
+          ^ "_" ^ field_name) in
+          (* Open a box for the field *)
+          F.pp_open_box fmt ctx.indent_incr;
+          F.pp_print_string fmt field_name;
+        )
+        else(
+          (* Open a box for the field *)
+          F.pp_open_box fmt ctx.indent_incr;
+          F.pp_print_string fmt field_name;
+        );
         F.pp_print_space fmt ();
-        F.pp_print_string fmt ":";
+        if backend () = Isabelle then F.pp_print_string fmt "::" else F.pp_print_string fmt ":";
         F.pp_print_space fmt ();
         extract_ty def.item_meta.span ctx fmt type_decl_group false f.field_ty;
         if backend () <> Lean && backend () <> Isabelle then F.pp_print_string fmt ";";
@@ -1233,13 +1247,19 @@ let extract_generic_params (span : Meta.span) (ctx : extraction_ctx)
       if backend () <> HOL4 then 
       if backend () = Isabelle then
         if type_params <> [] then (
+            let (first_expl, first_s) = List.hd type_params in
+            let rest = List.tl type_params in
+            insert_req_space ();
+            left_bracket first_expl;
+            F.pp_print_string fmt first_s;
+            if rest <> [] then
+              F.pp_print_string fmt ",";
             List.iter
-              (fun (expl, s) ->
+              (fun (_, s) ->
                 insert_req_space ();
-                left_bracket expl;
-                F.pp_print_string fmt s;
-                right_bracket expl)
-              type_params;
+                F.pp_print_string fmt s;)
+              rest;
+            F.pp_print_string fmt ")";
             if use_arrows then (
               F.pp_print_space fmt ();
               extract_arrow fmt () ))
@@ -1519,6 +1539,8 @@ let extract_type_decl_isabelle_empty_record (ctx : extraction_ctx) (fmt : F.form
   F.pp_print_string fmt "record ";
   F.pp_print_string fmt def_name;
   F.pp_print_string fmt " = ";
+  F.pp_force_newline fmt ();
+  F.pp_print_string fmt "    dummy :: unit";
   F.pp_close_box fmt ();
   F.pp_print_break fmt 0 0
 

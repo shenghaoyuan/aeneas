@@ -1485,8 +1485,8 @@ let fun_decl_kind_to_qualif (kind : decl_kind) : string option =
   | Isabelle -> (
       match kind with
       | SingleNonRec -> Some "definition"
-      | SingleRec -> Some "fun"
-      | MutRecFirst -> Some "fun"
+      | SingleRec -> Some "function"
+      | MutRecFirst -> Some "function"
       | MutRecInner -> Some "and"
       | MutRecLast -> Some "and"
       | Builtin -> Some "axiomatization"

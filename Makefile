@@ -100,6 +100,29 @@ isabelle:
 	./bin/aeneas tests/llbc/bitwise0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./charon/bin/charon rustc --dest-file ./tests/llbc/traits0.llbc --preset=aeneas -- tests/src/traits0.rs --crate-name=traits0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/traits0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+# TODO: fix following 11 tests
+	./charon/bin/charon rustc --dest-file ./tests/llbc/adt_borrows.llbc --preset=aeneas -- tests/src/adt-borrows.rs --crate-name=adt_borrows --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/adt_borrows.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/arrays.llbc --preset=aeneas -- tests/src/arrays.rs --crate-name=arrays --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/arrays.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/bitwise.llbc --preset=aeneas -- tests/src/bitwise.rs --crate-name=bitwise --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/bitwise.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+#./charon/bin/charon rustc --dest-file ./tests/llbc/constants.llbc --preset=aeneas -- tests/src/constants.rs --crate-name=constants --crate-type=rlib --allow=unused --allow=non_snake_case
+#./bin/aeneas tests/llbc/constants.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/defaulted_method.llbc --preset=aeneas -- tests/src/defaulted_method.rs --crate-name=defaulted_method --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/defaulted_method.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/demo.llbc --preset=aeneas -- tests/src/demo.rs --crate-name=demo --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/demo.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/hashmap.llbc --preset=aeneas -- tests/src/hashmap.rs --crate-name=hashmap --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/hashmap.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/loops.llbc --preset=aeneas -- tests/src/loops.rs --crate-name=loops --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/loops.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/no_nested_borrows.llbc --preset=aeneas -- tests/src/no_nested_borrows.rs --crate-name=no_nested_borrows --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/no_nested_borrows.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/switch_test.llbc --preset=aeneas -- tests/src/switch_test.rs --crate-name=switch_test --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/switch_test.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/vec.llbc --preset=aeneas -- tests/src/vec.rs --crate-name=vec --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/vec.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 
 # TODO: using ppx (in aeneas-ppx) breaks this command
 .PHONY: doc
