@@ -339,7 +339,7 @@ let rec extract_ty (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
               (extract_rec true) generics.types;
             F.pp_print_string fmt ")")
       | TAdtId _ | TBuiltin _ -> (
-          (* HOL4 behaves differently. Where in Coq/FStar/Lean/Isabelle we would write:
+          (* HOL4 behaves differently. Where in Coq/FStar/Lean we would write:
               `tree a b`
 
               In HOL4 we write:
@@ -568,18 +568,36 @@ and extract_generic_args (span : Meta.span) (ctx : extraction_ctx)
           ( filter types explicit.explicit_types,
             filter const_generics explicit.explicit_const_generics )
     in
-    if types <> [] then (
-      Collections.List.iter_link (F.pp_print_space fmt)
-        (extract_ty span ctx fmt no_params_tys true)
-        types);
-    if const_generics <> [] then (
-      [%cassert] span
-        (backend () <> HOL4)
-        "Constant generics are not supported yet when generating code for HOL4";
-      F.pp_print_space fmt ();
-      Collections.List.iter_link (F.pp_print_space fmt)
-        (extract_const_generic span ctx fmt true)
-        const_generics));
+    match backend () with
+    | Isabelle ->
+      if types <> [] then (
+        if List.length types > 1 then F.pp_print_string fmt "(";
+        Collections.List.iter_link (fun () : unit -> (F.pp_print_string fmt ", ";))
+          (extract_ty span ctx fmt no_params_tys true)
+          types);
+        if List.length types > 1 then F.pp_print_string fmt ")";
+      if const_generics <> [] then (
+        [%cassert] span
+          (backend () <> HOL4)
+          "Constant generics are not supported yet when generating code for HOL4";
+        F.pp_print_space fmt ();
+        Collections.List.iter_link (F.pp_print_space fmt)
+          (extract_const_generic span ctx fmt true)
+          const_generics)
+    | _ ->
+      if types <> [] then (
+        Collections.List.iter_link (F.pp_print_space fmt)
+          (extract_ty span ctx fmt no_params_tys true)
+          types);
+      if const_generics <> [] then (
+        [%cassert] span
+          (backend () <> HOL4)
+          "Constant generics are not supported yet when generating code for HOL4";
+        F.pp_print_space fmt ();
+        Collections.List.iter_link (F.pp_print_space fmt)
+          (extract_const_generic span ctx fmt true)
+          const_generics)
+  );
   if trait_refs <> [] then (
     F.pp_print_space fmt ();
     Collections.List.iter_link (F.pp_print_space fmt)
@@ -1080,7 +1098,9 @@ let extract_type_decl_struct_body (ctx : extraction_ctx) (fmt : F.formatter)
         F.pp_print_space fmt ();
         if backend () = Isabelle then F.pp_print_string fmt "::" else F.pp_print_string fmt ":";
         F.pp_print_space fmt ();
+        if backend () = Isabelle then F.pp_print_string fmt "\"";
         extract_ty def.item_meta.span ctx fmt type_decl_group false f.field_ty;
+        if backend () = Isabelle then F.pp_print_string fmt "\"";
         if backend () <> Lean && backend () <> Isabelle then F.pp_print_string fmt ";";
         (* Close the box for the field *)
         F.pp_close_box fmt ()

@@ -44,9 +44,9 @@ let () =
 
     We often compute the same value (typically: a name) if the target is F*, Coq
     or HOL4, and a different value if the target is Lean. *)
-let backend_choice (fstar_coq_hol4 : 'a) (lean : 'a) : 'a =
+let backend_choice (fstar_coq_hol4_isabelle : 'a) (lean : 'a) : 'a =
   match backend () with
-  | Coq | FStar | HOL4 | Isabelle -> fstar_coq_hol4
+  | Coq | FStar | HOL4 | Isabelle -> fstar_coq_hol4_isabelle
   | Lean -> lean
 
 let builtin_globals () : (string * string) list =
@@ -80,7 +80,8 @@ let mk_struct_constructor (type_name : string) : string =
   let prefix =
     match backend () with
     | FStar -> "Mk"
-    | Coq | HOL4 | Isabelle -> "mk"
+    | Coq | HOL4 -> "mk"
+    | Isabelle -> "mk"
     | Lean -> ""
   in
   let suffix =

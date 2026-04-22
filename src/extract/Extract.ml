@@ -1350,7 +1350,7 @@ and extract_StructUpdate (span : Meta.span) (ctx : extraction_ctx)
        - this is an array
     *)
     match supd.struct_id with
-    | TAdtId _ ->
+    | TAdtId adt_id ->
         F.pp_open_hvbox fmt 0;
         F.pp_open_hvbox fmt ctx.indent_incr;
         (* Inner/outer brackets: there are several syntaxes for the field updates.
@@ -1424,7 +1424,20 @@ and extract_StructUpdate (span : Meta.span) (ctx : extraction_ctx)
           (fun (fid, fe) ->
             F.pp_open_hvbox fmt ctx.indent_incr;
             let f = ctx_get_field span supd.struct_id fid ctx in
-            F.pp_print_string fmt f;
+            let def = TypeDeclId.Map.find adt_id ctx.trans_ctx.type_ctx.type_decls in
+            let struct_name = (
+              match backend () with
+              | Isabelle -> StringUtils.capitalize_first_letter
+                (ctx_compute_type_name_no_suffix ctx def.item_meta def.item_meta.name)
+              | _ -> ""
+            )
+            in
+            let _ = match backend () with
+              | Isabelle ->
+                F.pp_print_string fmt (struct_name ^ "_" ^ f);
+              | _ ->
+                F.pp_print_string fmt f;
+            in
             (* Simplification: if the field value is a variable the same
                name as the field, we do not print it.
 
@@ -1546,6 +1559,7 @@ let extract_fun_parameters (space : bool ref) (ctx : extraction_ctx)
                   lv.ty;
                 F.pp_print_space fmt ();
                 extract_arrow fmt ();
+                F.pp_print_space fmt ();
                 (* Close the box for the input parameters *)
                 F.pp_close_box fmt ();
                 ctx)
@@ -1927,7 +1941,7 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
    * TODO: figure out a cleaner way *)
   (match backend () with
   | Isabelle ->
-    F.pp_print_space fmt ();
+    (*F.pp_print_space fmt ();*)
     if is_opaque then
       extract_fun_input_parameters_types def.item_meta.span ctx fmt
         def.signature.inputs;
