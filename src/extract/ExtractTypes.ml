@@ -969,15 +969,23 @@ let extract_type_decl_enum_body (ctx : extraction_ctx) (fmt : F.formatter)
 let extract_type_decl_tuple_struct_body (span : Meta.span)
     (ctx : extraction_ctx) (fmt : F.formatter) (fields : field list) : unit =
   (* If the type is empty, we need to have a special treatment *)
-  if fields = [] then (
+  match fields with
+  | [] -> (
     F.pp_print_space fmt ();
     F.pp_print_string fmt (unit_name ()))
-  else
+  | first :: rest -> (
     let sep =
       match backend () with
       | Coq | FStar | HOL4 -> "*"
       | Lean | Isabelle -> "×"
     in
+    F.pp_print_space fmt ();
+    if backend () = Isabelle then F.pp_print_string fmt "\"";
+    extract_ty span ctx fmt TypeDeclId.Set.empty true first.field_ty;
+    if rest <> [] then (
+      F.pp_print_space fmt ();
+      F.pp_print_string fmt sep
+    );
     Collections.List.iter_link
       (fun () ->
         F.pp_print_space fmt ();
@@ -985,7 +993,9 @@ let extract_type_decl_tuple_struct_body (span : Meta.span)
       (fun (f : field) ->
         F.pp_print_space fmt ();
         extract_ty span ctx fmt TypeDeclId.Set.empty true f.field_ty)
-      fields
+      rest;
+    if backend () = Isabelle then F.pp_print_string fmt "\"";
+  )
 
 let extract_type_decl_struct_body (ctx : extraction_ctx) (fmt : F.formatter)
     (type_decl_group : TypeDeclId.Set.t) (kind : decl_kind) (def : type_decl)
