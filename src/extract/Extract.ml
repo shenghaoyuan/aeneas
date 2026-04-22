@@ -604,7 +604,7 @@ and extract_App (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
       | AdtCons adt_cons_id ->
           extract_adt_cons span ctx fmt inside adt_cons_id qualif.generics args
       | Proj proj ->
-          extract_field_projector span ctx fmt inside app proj qualif.generics
+          extract_field_projector span ctx fmt true app proj qualif.generics
             args
       | TraitConst (trait_ref, const_name) ->
           extract_trait_ref span ctx fmt TypeDeclId.Set.empty true trait_ref;
@@ -929,9 +929,19 @@ and extract_field_projector (span : Meta.span) (ctx : extraction_ctx)
         (* Extract the expression *)
         (* Isabelle uses prefix projection `field record` *)
         if backend () = Isabelle then(
-          F.pp_print_string fmt field_name;
+          let def_name = match proj.adt_id with
+          | TAdtId id -> (
+            let def = TypeDeclId.Map.find id ctx.trans_ctx.type_ctx.type_decls in
+            StringUtils.capitalize_first_letter
+              (ctx_compute_type_name_no_suffix ctx def.item_meta def.item_meta.name);
+            )
+          | _ -> ""
+          in
+          if inside then F.pp_print_string fmt "(";
+          F.pp_print_string fmt (def_name ^ "_" ^ field_name);
           F.pp_print_space fmt ();
-          extract_texpr span ctx fmt true arg)
+          extract_texpr span ctx fmt true arg;
+          if inside then F.pp_print_string fmt ")")
         else (
           extract_texpr span ctx fmt true arg;
           (* We allow to break where the "." appears (except Lean, it's a syntax error) *)
@@ -941,7 +951,7 @@ and extract_field_projector (span : Meta.span) (ctx : extraction_ctx)
           (match backend () with
           | FStar | Lean | HOL4 -> F.pp_print_string fmt field_name
           | Coq -> F.pp_print_string fmt ("(" ^ field_name ^ ")")
-          | Isabelle -> (* Unreachable due to if/else *) ()));
+          | Isabelle -> ()));
         (* Close the box *)
         F.pp_close_box fmt ()
   | arg :: args ->
