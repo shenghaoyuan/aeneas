@@ -100,7 +100,7 @@ isabelle:
 	./bin/aeneas tests/llbc/bitwise0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./charon/bin/charon rustc --dest-file ./tests/llbc/traits0.llbc --preset=aeneas -- tests/src/traits0.rs --crate-name=traits0 --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/traits0.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
-# TODO: fix following 11 tests
+# TODO: fix following 12 tests
 	./charon/bin/charon rustc --dest-file ./tests/llbc/adt_borrows.llbc --preset=aeneas -- tests/src/adt-borrows.rs --crate-name=adt_borrows --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/adt_borrows.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./charon/bin/charon rustc --dest-file ./tests/llbc/arrays.llbc --preset=aeneas -- tests/src/arrays.rs --crate-name=arrays --crate-type=rlib --allow=unused --allow=non_snake_case
@@ -121,6 +121,8 @@ isabelle:
 	./bin/aeneas tests/llbc/no_nested_borrows.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./charon/bin/charon rustc --dest-file ./tests/llbc/switch_test.llbc --preset=aeneas -- tests/src/switch_test.rs --crate-name=switch_test --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/switch_test.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
+	./charon/bin/charon rustc --dest-file ./tests/llbc/traits.llbc --preset=aeneas -- tests/src/traits.rs --crate-name=traits --crate-type=rlib --allow=unused --allow=non_snake_case
+	./bin/aeneas tests/llbc/traits.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 	./charon/bin/charon rustc --dest-file ./tests/llbc/vec.llbc --preset=aeneas -- tests/src/vec.rs --crate-name=vec --crate-type=rlib --allow=unused --allow=non_snake_case
 	./bin/aeneas tests/llbc/vec.llbc -dest tests/isabelle/ -backend isabelle -abort-on-error
 

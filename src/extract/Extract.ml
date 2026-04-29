@@ -1245,36 +1245,40 @@ and extract_Switch (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
       extract_branch true e_then;
       extract_branch false e_else
   | Match branches -> (
-      (* Open a box for the [match ... with] *)
-      F.pp_open_hovbox fmt ctx.indent_incr;
-      (* Print the [match ... with] *)
-      let match_begin =
-        match backend () with
-        | FStar -> "begin match"
-        | Coq -> "match"
-        | Lean -> if ctx.use_dep_ite then "match h:" else "match"
-        | HOL4 ->
-            (* We're being extra safe in the case of HOL4 *)
-            "(case"
-        | Isabelle -> "case"
-      in
-      F.pp_print_string fmt match_begin;
-      F.pp_print_space fmt ();
       let scrut_inside = PureUtils.texpr_requires_parentheses span scrut in
-      extract_texpr span ctx fmt scrut_inside scrut;
-      F.pp_print_space fmt ();
-      let match_scrut_end =
-        match backend () with
-        | FStar | Coq | Lean -> "with"
-        | HOL4 | Isabelle -> "of"
-      in
-      F.pp_print_string fmt match_scrut_end;
-      (* Close the box for the [match ... with] *)
-      F.pp_close_box fmt ();
+      if backend () <> Isabelle then (
+        (* Open a box for the [match ... with] *)
+        F.pp_open_hovbox fmt ctx.indent_incr;
+        (* Print the [match ... with] *)
+        let match_begin =
+          match backend () with
+          | FStar -> "begin match"
+          | Coq -> "match"
+          | Lean -> if ctx.use_dep_ite then "match h:" else "match"
+          | HOL4 ->
+              (* We're being extra safe in the case of HOL4 *)
+              "(case"
+          | Isabelle -> ""
+        in
+        F.pp_print_string fmt match_begin;
+        F.pp_print_space fmt ();
+        extract_texpr span ctx fmt scrut_inside scrut;
+        F.pp_print_space fmt ();
+        let match_scrut_end =
+          match backend () with
+          | FStar | Coq | Lean -> "with"
+          | HOL4 -> "of"
+          | Isabelle -> ""
+        in
+        F.pp_print_string fmt match_scrut_end;
+        (* Close the box for the [match ... with] *)
+        F.pp_close_box fmt ();
+      );
 
       (* Extract the branches *)
-      let extract_branch (is_first : bool) (br : match_branch) : unit =
-        F.pp_print_space fmt ();
+      let extract_branch (is_first : bool) (is_last : bool) (br : match_branch) : unit =
+        if not is_first then
+          F.pp_print_space fmt ();
         (* Open a box for the pattern+branch *)
         F.pp_open_hvbox fmt ctx.indent_incr;
         (* Open a box for the pattern *)
@@ -1282,19 +1286,35 @@ and extract_Switch (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
         (* Print the pattern *)
         let print_bar = 
           match backend () with 
-          | Isabelle -> not is_first
+          | Isabelle -> false
           | _ -> true
         in
         if print_bar then (
           F.pp_print_string fmt "|";
           F.pp_print_space fmt ();
         );
-        let ctx = extract_tpattern false span ctx fmt false false br.pat in
-        F.pp_print_space fmt ();
+        if backend () = Isabelle then (
+          if is_last then
+            F.pp_print_string fmt "else"
+          else (
+            if is_first then F.pp_print_string fmt "if"
+            else if not is_last then F.pp_print_string fmt "else if";
+            F.pp_print_space fmt ();
+            extract_texpr span ctx fmt scrut_inside scrut;
+            F.pp_print_space fmt ();
+            F.pp_print_string fmt "=";
+            F.pp_print_space fmt ();
+          )
+        );
+        if backend () <> Isabelle || not is_last then (
+          let ctx = extract_tpattern false span ctx fmt false (backend()=Isabelle) br.pat in
+          F.pp_print_space fmt ();
+        );
         let arrow =
           match backend () with
           | FStar -> "->"
-          | Coq | Lean | HOL4 | Isabelle -> "=>"
+          | Coq | Lean | HOL4 -> "=>"
+          | Isabelle -> if not is_last then "then" else ""
         in
         F.pp_print_string fmt arrow;
         (* Close the box for the pattern *)
@@ -1310,7 +1330,7 @@ and extract_Switch (span : Meta.span) (ctx : extraction_ctx) (fmt : F.formatter)
         F.pp_close_box fmt ()
       in
 
-      List.iteri (fun i br -> extract_branch (i = 0) br)  branches;
+      List.iteri (fun i br -> extract_branch (i = 0) (i = (List.length branches - 1))br)  branches;
 
       (* End the match *)
       match backend () with
@@ -2047,7 +2067,6 @@ let extract_fun_decl_gen (ctx : extraction_ctx) (fmt : F.formatter)
       F.pp_close_box fmt ()
     in ());
 
-
   (* Print the "=" *)
   if not is_opaque then (
     F.pp_print_space fmt ();
@@ -2530,7 +2549,6 @@ let extract_global_decl_aux (ctx : extraction_ctx) (fmt : F.formatter)
     [ "[" ^ name_to_string ctx global.item_meta.name ^ "]" ]
     name global.span;
   F.pp_print_space fmt ();
-
   let decl_name = ctx_get_global span global.def_id ctx in
   let body_name =
     ctx_get_function span
